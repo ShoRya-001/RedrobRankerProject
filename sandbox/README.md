@@ -13,7 +13,7 @@ pip install -r sandbox/requirements.txt
 streamlit run sandbox/streamlit_app.py
 ```
 
-Open the shown localhost URL, upload a candidate sample and job description, then download the ranked CSV.
+Open the shown localhost URL, upload a candidate sample and a TXT/MD/DOCX job description, then download the ranked CSV.
 
 ## Streamlit Community Cloud deployment
 

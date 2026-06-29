@@ -23,7 +23,7 @@ team_members:
     role: "Sandbox & Documentation Engineer"
 
 github_repo: "https://github.com/ShoRya-001/RedrobRankerProject"
-sandbox_link: "https://REPLACE_WITH_YOUR_STREAMLIT_OR_OTHER_SANDBOX_LINK"
+sandbox_link: "https://redrob-ranker-project.streamlit.app"
 reproduce_command (BASH): "python rank.py --candidates ./candidates.jsonl --job ./uploads/job_description.docx --out ./team_Core4.csv --top-k 100"
 
 

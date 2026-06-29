@@ -1,3 +1,4 @@
 # Official ranking path (`python rank.py ...`) uses only the Python standard library.
-# Streamlit is required only for the hosted sandbox/demo link.
+# Streamlit and python-docx are required only for the hosted sandbox/demo link.
 streamlit>=1.36,<2
+python-docx>=1.1.2,<2

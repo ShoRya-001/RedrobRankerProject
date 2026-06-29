@@ -183,6 +183,8 @@ sandbox/streamlit_app.py
 
 5. Deploy and use the generated Streamlit URL as the portal `sandbox_link`.
 
+
+Open: https://redrob-ranker-project.streamlit.app
 ---
 
 ## Optional Docker Sandbox

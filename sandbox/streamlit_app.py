@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+from io import BytesIO
 from pathlib import Path
 import sys
 
@@ -14,6 +15,33 @@ if str(REPO_ROOT) not in sys.path:
 from rank import iter_candidates, rank_candidates, write_submission  # noqa: E402
 from validate_submission import validate_submission  # noqa: E402
 
+
+def uploaded_job_to_text(uploaded_file) -> str:
+    """Read uploaded TXT/MD/DOCX job descriptions as plain text for the sandbox."""
+    suffix = Path(uploaded_file.name).suffix.lower()
+    data = uploaded_file.getvalue()
+    if suffix == ".docx":
+        try:
+            from docx import Document
+        except ImportError as exc:  # pragma: no cover - deployment dependency guard
+            raise RuntimeError("DOCX support requires python-docx. Add python-docx to requirements.txt.") from exc
+        document = Document(BytesIO(data))
+        paragraphs = [paragraph.text for paragraph in document.paragraphs if paragraph.text.strip()]
+        table_rows: list[str] = []
+        for table in document.tables:
+            for row in table.rows:
+                cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
+                if cells:
+                    table_rows.append(" | ".join(cells))
+        return "\n".join(paragraphs + table_rows).strip()
+    for encoding in ("utf-8", "utf-16", "latin-1"):
+        try:
+            return data.decode(encoding).strip()
+        except UnicodeDecodeError:
+            continue
+    return data.decode("utf-8", errors="ignore").strip()
+
+
 st.set_page_config(page_title="Redrob Candidate Ranker Sandbox", page_icon="🎯", layout="wide")
 
 st.title("🎯 Redrob Candidate Ranker Sandbox")
@@ -26,7 +54,7 @@ with st.expander("What this sandbox does", expanded=False):
     st.markdown(
         """
         - Accepts a small candidate sample as JSON, JSONL, TXT, or JSONL.GZ.
-        - Accepts the job description as upload or pasted text.
+        - Accepts the job description as TXT, MD, DOCX, or pasted text.
         - Runs the deterministic offline ranker end-to-end.
         - Produces a CSV with `candidate_id,rank,score,reasoning`.
         - Uses no hosted LLM/API calls during ranking.
@@ -57,7 +85,7 @@ with right:
     job_upload = None
     job_text = ""
     if not use_repo_job:
-        job_upload = st.file_uploader("Upload job description text", type=["txt", "md"])
+        job_upload = st.file_uploader("Upload job description", type=["txt", "md", "docx"])
         job_text = st.text_area("Or paste job description", height=180)
 
 st.subheader("3. Ranking settings")
@@ -88,8 +116,16 @@ if run:
         if use_repo_job:
             job_path = sample_job_path
         elif job_upload is not None:
+            try:
+                extracted_job_text = uploaded_job_to_text(job_upload)
+            except Exception as exc:
+                st.error(f"Could not read job description file: {exc}")
+                st.stop()
+            if not extracted_job_text:
+                st.error("The uploaded job description did not contain readable text.")
+                st.stop()
             job_path = tmp / "job_description.txt"
-            job_path.write_bytes(job_upload.getvalue())
+            job_path.write_text(extracted_job_text, encoding="utf-8")
         elif job_text.strip():
             job_path = tmp / "job_description.txt"
             job_path.write_text(job_text, encoding="utf-8")
@@ -155,7 +191,7 @@ st.markdown(
     **Official reproduction command**
 
     ```bash
-    python rank.py --candidates ./candidates.jsonl --job ./uploads/job_description.docx --out ./team_Core4.csv --top-k 100
+    python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100
     python validate_submission.py ./team_yourid.csv
     ```
     """
