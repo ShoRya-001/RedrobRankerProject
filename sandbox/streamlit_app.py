@@ -446,4 +446,19 @@ with tab_output:
     )
 
 st.divider()
-st.caption("Redrob Candidate Ranker Sandbox · deterministic offline ranking · no hosted LLM calls during ranking")
+
+st.markdown(
+    """
+    <div style="
+        text-align:center;
+        padding:12px;
+        color:#9CA3AF;
+        font-size:15px;
+        letter-spacing:0.4px;
+    ">
+        Crafted with <span style="color:#ff4b4b;">❤️</span> by
+        <strong style="color:#ffffff;">Core4</strong> ✨
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
