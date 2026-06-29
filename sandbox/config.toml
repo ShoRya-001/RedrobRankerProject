@@ -1,0 +1,4 @@
+[server]
+# Allow larger candidate samples / JSONL uploads in the hosted sandbox.
+# Value is in megabytes. Streamlit default is 200 MB.
+maxUploadSize = 500
