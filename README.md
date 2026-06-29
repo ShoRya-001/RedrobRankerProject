@@ -34,7 +34,9 @@ The ranking step is:
     ├── x.txt                       # One-line JSONL sample candidate
     ├── sample_candidates.json      # First 50 candidates, JSON array
     ├── sample_submission.csv       # Format reference
+    ├── submission_spec.docx        # Submission Specification
     └── candidate_schema.json       # Candidate schema reference
+    
 ```
 
 The real `candidates.jsonl` / `candidates.jsonl.gz` file is intentionally **not committed**.
