@@ -30,7 +30,7 @@ The ranking step is:
 │   ├── requirements.txt
 │   └── README.md
 └── uploads/
-    ├── A1.txt                      # Released job description, converted to text
+    ├── job_description.docx        # Released job description
     ├── x.txt                       # One-line JSONL sample candidate
     ├── sample_candidates.json      # First 50 candidates, JSON array
     ├── sample_submission.csv       # Format reference
@@ -52,7 +52,7 @@ candidates.jsonl
 Then run:
 
 ```bash
-python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./submission.csv --top-k 100
+python rank.py --candidates ./candidates.jsonl --job ./uploads/job_description.docx --out ./submission.csv --top-k 100
 ```
 
 If the candidate file is gzipped:
@@ -84,8 +84,8 @@ Example with a real local candidate file:
 ```powershell
 python rank.py `
   --candidates C:\redrob-data\candidates.jsonl `
-  --job uploads\A1.txt `
-  --out team_yourid.csv `
+  --job uploads\job_description.docx `
+  --out team_.csv `
   --top-k 100
 
 python validate_submission.py team_yourid.csv
@@ -96,7 +96,7 @@ Example with gzipped candidate file:
 ```powershell
 python rank.py `
   --candidates C:\redrob-data\candidates.jsonl.gz `
-  --job uploads\A1.txt `
+  --job uploads\job_description.docx `
   --out team_yourid.csv `
   --top-k 100
 
@@ -110,13 +110,13 @@ python validate_submission.py team_yourid.csv
 Test JSON array support with the 50-candidate sample:
 
 ```bash
-python rank.py --candidates ./uploads/sample_candidates.json --job ./uploads/A1.txt --out ./sample50_ranked.csv --top-k 50
+python rank.py --candidates ./uploads/sample_candidates.json --job ./uploads/job_description.docx --out ./sample50_ranked.csv --top-k 50
 ```
 
 Test JSONL support with the one-candidate sample:
 
 ```bash
-python rank.py --candidates ./uploads/x.txt --job ./uploads/A1.txt --out ./one_ranked.csv --top-k 1
+python rank.py --candidates ./uploads/x.txt --job ./uploads/job_description.docx --out ./one_ranked.csv --top-k 1
 ```
 
 Official validation requires exactly 100 rows, so validate only the real top-100 output.
@@ -203,56 +203,6 @@ Open:
 
 ```text
 http://localhost:8501
-```
-
----
-
-## Submission Checklist
-
-Submit these in the Redrob portal:
-
-1. Final top-100 CSV, e.g. `team_yourid.csv`
-2. GitHub repository URL
-3. Sandbox/demo link
-4. Team name
-5. Primary contact name, email, and phone
-6. Team member list
-7. AI tools declaration
-8. Compute environment summary
-9. Methodology summary, recommended
-
-Before upload, confirm:
-
-```bash
-python validate_submission.py ./team_yourid.csv
-```
-
-prints:
-
-```text
-Submission is valid.
-```
-
----
-
-## AI Tools Declaration
-
-AI tools were used as development assistants for implementation, debugging, and documentation. The submitted ranking step itself is deterministic and does not call any hosted AI/LLM APIs during ranking.
-
-Suggested portal declaration:
-
-```text
-Other: Arena.ai Agent Mode was used for architecture, implementation assistance, debugging, and documentation. The ranking step is deterministic, offline, CPU-only, and does not call hosted LLM APIs during ranking.
-```
-
----
-
-## Compute Environment Example
-
-Use your actual machine details in the portal. Example:
-
-```text
-Windows 11 laptop, 8 CPU cores, 16GB RAM, Python 3.12, CPU-only, no network during ranking.
 ```
 
 ---
