@@ -58,7 +58,7 @@ python rank.py --candidates ./candidates.jsonl --job ./uploads/job_description.d
 If the candidate file is gzipped:
 
 ```bash
-python rank.py --candidates ./candidates.jsonl.gz --job ./uploads/A1.txt --out ./submission.csv --top-k 100
+python rank.py --candidates ./candidates.jsonl.gz --job ./uploads/job_description.docx --out ./submission.csv --top-k 100
 ```
 
 Validate the output:
@@ -85,7 +85,7 @@ Example with a real local candidate file:
 python rank.py `
   --candidates C:\redrob-data\candidates.jsonl `
   --job uploads\job_description.docx `
-  --out team_.csv `
+  --out team_Core4.csv `
   --top-k 100
 
 python validate_submission.py team_yourid.csv
@@ -97,7 +97,7 @@ Example with gzipped candidate file:
 python rank.py `
   --candidates C:\redrob-data\candidates.jsonl.gz `
   --job uploads\job_description.docx `
-  --out team_yourid.csv `
+  --out team_Core4.csv `
   --top-k 100
 
 python validate_submission.py team_yourid.csv
@@ -199,21 +199,27 @@ Run:
 docker run -p 8501:8501 redrob-ranker
 ```
 
-Open:
-
-```text
-http://localhost:8501
-```
+Open: http://localhost:8501
 
 ---
 
-## Files Not Included
+## AI Tools Declaration
 
+AI tools were used as development assistants for implementation, debugging, and documentation. The submitted ranking step itself is deterministic and does not call any hosted AI/LLM APIs during ranking.
+
+Other: Arena.ai Agent Mode was used for architecture, implementation assistance, debugging, and documentation. The ranking step is deterministic, offline, CPU-only, and does not call hosted LLM APIs during ranking.
+
+---
+
+## Compute Environment 
+Windows 11 laptop, 6 CPU cores, 16GB RAM, Python 3.14.2, CPU-only, no network during ranking.
+
+---
+## Files Not Included
 The released full candidate pool is not included in this repository:
 
-```text
 candidates.jsonl
 candidates.jsonl.gz
-```
 
 Those files should be supplied at runtime using `--candidates`.
+---

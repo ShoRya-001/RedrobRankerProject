@@ -1,25 +1,38 @@
-team_name: "REPLACE_WITH_YOUR_TEAM_NAME"
+team_name: "Core4"
 
 primary_contact:
-  name: "REPLACE_WITH_PRIMARY_CONTACT_NAME"
-  email: "REPLACE_WITH_PRIMARY_CONTACT_EMAIL"
-  phone: "+91-REPLACE_WITH_PHONE"
+  name: "Shorya Jain"
+  email: "1demonop07@gmail.com"
+  phone: "+91-8003485675"
 
 team_members:
-  - name: "REPLACE_WITH_MEMBER_NAME"
-    email: "REPLACE_WITH_MEMBER_EMAIL"
-    role: "ML Engineer / Data Engineer"
+  - name: "Naman Jain"
+    email: "naman.jain_btech25@gsv.ac.in"
+    role: "Team Lead / ML Ranking Engineer"
 
-github_repo: "https://github.com/REPLACE_USERNAME/REPLACE_REPO"
+  - name: "Shorya Jain"
+    email: "shorya.jain_btech25@gsv.ac.in"
+    role: "Data Engineer / Pipeline Engineer"
+  
+  - name: "Anurag Singh"
+    email: "anurag.singh_btech25@gsv.ac.in"
+    role: "Evaluation & QA Engineer"
+  
+  - name: "Ajeet Kumar Yadav"
+    email: "ajeet.kumar.yadav_btech25@gsv.ac.in"
+    role: "Sandbox & Documentation Engineer"
+
+github_repo: "https://github.com/ShoRya-001/RedrobRankerProject"
 sandbox_link: "https://REPLACE_WITH_YOUR_STREAMLIT_OR_OTHER_SANDBOX_LINK"
-reproduce_command: "python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100"
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --job ./uploads/job_desrciption.docx --out ./team_Core4.csv --top-k 100"
+
 
 compute:
-  platform: "REPLACE, e.g. Windows laptop / MacBook / Linux VM"
-  cpu_cores: 8
+  platform: "Windows laptop"
+  cpu_cores: 6
   ram_gb: 16
-  python_version: "3.12"
-  os: "REPLACE, e.g. Windows 11"
+  python_version: "Python 3.14.2"
+  os: "Windows 11"
   gpu_used: false
   network_used_during_ranking: false
   approximate_runtime_seconds: 60
