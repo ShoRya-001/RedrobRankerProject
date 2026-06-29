@@ -1,0 +1,53 @@
+team_name: "your-team-name"
+
+primary_contact:
+  name: "Your Name"
+  email: "you@example.com"
+  phone: "+91-XXXXXXXXXX"
+
+team_members:
+  - name: "Your Name"
+    email: "you@example.com"
+    role: "ML Engineer / Data Engineer"
+
+github_repo: "https://github.com/YOUR_USERNAME/YOUR_REPO"
+sandbox_link: "https://YOUR_STREAMLIT_APP.streamlit.app"
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100"
+
+compute:
+  platform: "CPU-only local/Docker environment"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.12"
+  os: "Linux/macOS/Windows"
+  gpu_used: false
+  network_used_during_ranking: false
+  approximate_runtime_seconds: 60
+  peak_memory_gb: 1.5
+
+ai_tools_used:
+  used_ai_tools: true
+  tools:
+    - name: "Arena.ai Agent Mode"
+      purpose: "Implementation assistance, debugging, and documentation"
+      data_shared: "Public hackathon docs and small sample candidate data only; no private 100K file required."
+  declaration_text: >
+    AI tools were used as development assistants. The submitted ranking step is a
+    deterministic, offline, CPU-only Python implementation and does not call hosted
+    LLM APIs during ranking.
+
+methodology_summary: |
+  Offline deterministic ranker for the Redrob Senior AI Engineer JD. The model combines
+  explicit retrieval/ranking evidence, skill proficiency/duration/endorsements, applied
+  ML/NLP experience, production/product-company career evidence, 5-9 year seniority fit,
+  location/logistics, and Redrob behavioral availability signals. It penalizes keyword
+  stuffing, consulting-only careers, CV/speech-only AI profiles without IR exposure,
+  low activity/response rates, long notice periods, and honeypot-style impossible skill
+  claims. The output is a validator-compatible top-100 CSV with profile-grounded reasoning.
+
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true

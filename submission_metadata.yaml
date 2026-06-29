@@ -1,0 +1,52 @@
+team_name: "REPLACE_WITH_YOUR_TEAM_NAME"
+
+primary_contact:
+  name: "REPLACE_WITH_PRIMARY_CONTACT_NAME"
+  email: "REPLACE_WITH_PRIMARY_CONTACT_EMAIL"
+  phone: "+91-REPLACE_WITH_PHONE"
+
+team_members:
+  - name: "REPLACE_WITH_MEMBER_NAME"
+    email: "REPLACE_WITH_MEMBER_EMAIL"
+    role: "ML Engineer / Data Engineer"
+
+github_repo: "https://github.com/REPLACE_USERNAME/REPLACE_REPO"
+sandbox_link: "https://REPLACE_WITH_YOUR_STREAMLIT_OR_OTHER_SANDBOX_LINK"
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100"
+
+compute:
+  platform: "REPLACE, e.g. Windows laptop / MacBook / Linux VM"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.12"
+  os: "REPLACE, e.g. Windows 11"
+  gpu_used: false
+  network_used_during_ranking: false
+  approximate_runtime_seconds: 60
+  peak_memory_gb: 1.5
+
+ai_tools_used:
+  used_ai_tools: true
+  tools:
+    - name: "Arena.ai Agent Mode"
+      purpose: "Architecture, implementation assistance, debugging, documentation"
+      data_shared: "Hackathon docs and small sample candidates only; no private 100K candidate pool required."
+  declaration_text: >
+    AI tools were used as development assistants. The submitted ranking step is a
+    deterministic offline Python implementation and does not call hosted LLM APIs
+    during ranking.
+
+methodology_summary: |
+  Deterministic offline ranker for the Redrob Senior AI Engineer JD. It combines
+  retrieval/ranking evidence, embeddings/vector database skills, applied ML/NLP depth,
+  Python production engineering, product-company career evidence, 5-9 year seniority fit,
+  location/logistics, and Redrob behavioral signals. It down-weights keyword-stuffers,
+  consulting-only histories, inactive candidates, low response rates, long notice periods,
+  CV/speech-only AI profiles without IR evidence, and honeypot-style impossible claims.
+
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true
