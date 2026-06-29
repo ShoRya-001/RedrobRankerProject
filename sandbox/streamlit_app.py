@@ -155,7 +155,7 @@ st.markdown(
     **Official reproduction command**
 
     ```bash
-    python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100
+    python rank.py --candidates ./candidates.jsonl --job ./uploads/job_description.docx --out ./team_Core4.csv --top-k 100
     python validate_submission.py ./team_yourid.csv
     ```
     """
