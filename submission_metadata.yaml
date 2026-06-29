@@ -24,7 +24,7 @@ team_members:
 
 github_repo: "https://github.com/ShoRya-001/RedrobRankerProject"
 sandbox_link: "https://REPLACE_WITH_YOUR_STREAMLIT_OR_OTHER_SANDBOX_LINK"
-reproduce_command: "python rank.py --candidates ./candidates.jsonl --job ./uploads/job_desrciption.docx --out ./team_Core4.csv --top-k 100"
+reproduce_command (BASH): "python rank.py --candidates ./candidates.jsonl --job ./uploads/job_description.docx --out ./team_Core4.csv --top-k 100"
 
 
 compute:
@@ -35,7 +35,7 @@ compute:
   os: "Windows 11"
   gpu_used: false
   network_used_during_ranking: false
-  approximate_runtime_seconds: 60
+  approximate_runtime_seconds: 75
   peak_memory_gb: 1.5
 
 ai_tools_used:
