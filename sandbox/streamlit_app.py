@@ -559,39 +559,17 @@ textarea:focus-visible {
   background: var(--accent-soft) !important;
 }
 
-/* Uploader */
 [data-testid="stFileUploader"] section {
-  border: 2px dashed rgba(29, 185, 84, 0.72) !important;
+  border: 1.5px dashed var(--accent-border) !important;
   border-radius: 20px !important;
-  background: rgba(29, 185, 84, 0.12) !important;
+  background: color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%) !important;
   padding: 18px !important;
-  box-shadow: inset 0 0 0 1px rgba(29, 185, 84, 0.14), 0 10px 28px rgba(0, 0, 0, 0.16);
 }
 
 [data-testid="stFileUploader"] section:hover {
-  border-color: #1DB954 !important;
-  background: rgba(29, 185, 84, 0.18) !important;
-  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.20), 0 16px 36px rgba(0, 0, 0, 0.20);
-}
-
-[data-testid="stFileUploader"] button {
-  background: #1DB954 !important;
-  color: #0B0B0B !important;
-  border: 1px solid rgba(29, 185, 84, 0.78) !important;
-  border-radius: 12px !important;
-  min-height: 48px !important;
-  padding: 0.68rem 1.25rem !important;
-  font-weight: 900 !important;
-  font-size: 0.95rem !important;
-  box-shadow: 0 10px 24px rgba(29, 185, 84, 0.28) !important;
-  cursor: pointer !important;
-}
-
-[data-testid="stFileUploader"] button:hover {
-  background: #23D564 !important;
-  color: #060606 !important;
-  border-color: #23D564 !important;
-  box-shadow: 0 14px 30px rgba(29, 185, 84, 0.34) !important;
+  border-color: var(--accent) !important;
+  background: var(--surface-hover) !important;
+  box-shadow: 0 0 0 3px rgba(29,185,84,0.08);
 }
 
 [data-testid="stFileUploader"] small,
@@ -901,22 +879,6 @@ pre, code {
   font-weight: 850;
 }
 
-.core4-footer {
-  margin-top: 28px;
-  min-height: 56px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: var(--glass);
-  box-shadow: var(--shadow-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: var(--text-2);
-  font-weight: 800;
-  letter-spacing: 0.01em;
-}
-
 hr { border-color: var(--border) !important; }
 
 @keyframes tickPop {
@@ -971,28 +933,6 @@ for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
-if "use_repo_sample" not in st.session_state:
-    st.session_state.use_repo_sample = sample_candidates_path.exists()
-if "use_repo_job" not in st.session_state:
-    st.session_state.use_repo_job = sample_job_path.exists()
-if "job_text_input" not in st.session_state:
-    st.session_state.job_text_input = ""
-
-
-def sync_upload_readiness() -> None:
-    candidate_upload = st.session_state.get("candidate_upload_input")
-    use_repo_sample = bool(st.session_state.get("use_repo_sample", False))
-    st.session_state.candidate_ready = bool(
-        (use_repo_sample and sample_candidates_path.exists()) or (candidate_upload is not None)
-    )
-
-    job_upload = st.session_state.get("job_upload_input")
-    job_text = str(st.session_state.get("job_text_input", "")).strip()
-    use_repo_job = bool(st.session_state.get("use_repo_job", False))
-    st.session_state.job_ready = bool(
-        (use_repo_job and sample_job_path.exists()) or (job_upload is not None) or bool(job_text)
-    )
-
 
 def icon_svg(name: str, size: int = 20) -> str:
     icons = {
@@ -1010,8 +950,7 @@ def icon_svg(name: str, size: int = 20) -> str:
     return (
         f'<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" '
         f'stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
-        f'{icons.get(name, icons["target"])}'
-        f"</svg>"
+        f'{icons.get(name, icons["target"])}</svg>'
     )
 
 
@@ -1157,7 +1096,7 @@ def checklist_item(index: int, label: str, done: bool) -> str:
         f'<div class="check-item">'
         f'<div class="check-dot {done_class}">{dot}</div>'
         f'<div class="check-label {done_class}">{index}. {html.escape(label)}</div>'
-        f"</div>"
+        f'</div>'
     )
 
 
@@ -1250,7 +1189,7 @@ def step_status(index: int, title: str, done: bool, active: bool) -> str:
         f'<div class="{classes}">{check}'
         f'<div class="step-kicker">STEP {index}</div>'
         f'<div class="step-title">{html.escape(title)}</div>'
-        f"</div>"
+        f'</div>'
     )
 
 
@@ -1497,8 +1436,6 @@ def render_results() -> None:
     render_results_table(rows)
 
 
-sync_upload_readiness()
-
 with st.sidebar:
     st.markdown(
         f"""
@@ -1574,17 +1511,17 @@ elif page == "Run Ranker":
     left, right = st.columns(2)
 
     with left:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<span class="step-pill">STEP 1 · Upload Candidates</span>', unsafe_allow_html=True)
-        use_repo_sample = st.checkbox("Use bundled sample_candidates.json", key="use_repo_sample")
+        use_repo_sample = sample_candidates_path.exists() and st.checkbox("Use bundled sample_candidates.json", value=True)
         candidate_upload = None
         if not use_repo_sample:
             candidate_upload = st.file_uploader(
                 "Upload candidate sample",
                 type=["json", "jsonl", "ndjson", "txt", "gz"],
                 help="Accepts JSON array, JSONL/NDJSON/TXT with one JSON object per line, or gzipped JSONL.",
-                key="candidate_upload_input",
             )
-        sync_upload_readiness()
+        st.session_state.candidate_ready = bool(use_repo_sample or candidate_upload is not None)
         if use_repo_sample:
             candidate_success_card("sample_candidates.json", sample_candidates_path.stat().st_size, count_candidates(sample_candidates_path))
         elif candidate_upload is not None:
@@ -1594,10 +1531,12 @@ elif page == "Run Ranker":
             candidate_success_card(candidate_upload.name, candidate_upload.size, count_candidates(temp_candidate_path))
             temp_candidate_path.unlink(missing_ok=True)
         st.caption("Sandbox samples can be ≤100 candidates. Use the CLI for the official 100K run.")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with right:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<span class="step-pill">STEP 2 · Upload Job Description</span>', unsafe_allow_html=True)
-        use_repo_job = st.checkbox("Use bundled A1.txt job description", key="use_repo_job")
+        use_repo_job = sample_job_path.exists() and st.checkbox("Use bundled A1.txt job description", value=True)
         job_upload = None
         job_text = ""
         if not use_repo_job:
@@ -1605,15 +1544,9 @@ elif page == "Run Ranker":
                 "Upload job description",
                 type=["txt", "md", "docx"],
                 help="DOCX files are parsed with python-docx; text and markdown are read directly.",
-                key="job_upload_input",
             )
-            job_text = st.text_area(
-                "Or paste job description",
-                height=165,
-                placeholder="Paste the job description here...",
-                key="job_text_input",
-            )
-        sync_upload_readiness()
+            job_text = st.text_area("Or paste job description", height=165, placeholder="Paste the job description here...")
+        st.session_state.job_ready = bool(use_repo_job or job_upload is not None or job_text.strip())
         if use_repo_job:
             job_success_card("A1.txt", sample_job_path.stat().st_size)
         elif job_upload is not None:
@@ -1621,6 +1554,7 @@ elif page == "Run Ranker":
         elif job_text.strip():
             job_success_card("Pasted job description", len(job_text.encode("utf-8")), "Text entered successfully.")
         st.caption("DOCX, TXT, MD, or pasted text are supported.")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.write("")
     top_k = st.slider(
@@ -1661,8 +1595,15 @@ elif page == "Results":
 
 st.markdown(
     """
-    <div class="core4-footer">
-      Made with ❤️ by Core4
+    <div class="footer-card">
+      <div>
+        <strong>Built for the Redrob AI Challenge</strong><br>
+        Offline Candidate Ranking Engine · Version 1.0
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/" target="_blank">GitHub</a>
+        <a href="#" target="_self">Documentation</a>
+      </div>
     </div>
     """,
     unsafe_allow_html=True,
