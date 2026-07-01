@@ -213,6 +213,41 @@ textarea::placeholder, input::placeholder { color: var(--muted) !important; opac
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes grow { from { width: 0 } }
 
+
+
+/* Make Streamlit dataframe toolbar icons (CSV, search, fullscreen) visible in light and dark mode. */
+[data-testid="stElementToolbar"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: color-mix(in srgb, var(--paper) 86%, transparent) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 999px !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+[data-testid="stElementToolbar"] button,
+[data-testid="stElementToolbar"] [role="button"] {
+  color: var(--ink) !important;
+  background: var(--paper) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 999px !important;
+  opacity: 1 !important;
+}
+
+[data-testid="stElementToolbar"] svg,
+[data-testid="stElementToolbar"] path {
+  color: var(--ink) !important;
+  stroke: var(--ink) !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
+
+[data-testid="stDataFrame"] button,
+[data-testid="stDataFrame"] [role="button"] {
+  color: var(--ink) !important;
+}
+
 @media (max-width: 980px) { .bento-grid, .step-grid, .preview-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .bento-grid, .step-grid, .preview-grid { grid-template-columns: 1fr; } .topbar { flex-direction: column; align-items: flex-start; } .hero-title { font-size: 2.2rem; } }
 </style>
@@ -232,8 +267,6 @@ DEFAULT_STATE = {
     "candidate_ready": False,
     "job_ready": False,
     "ranking_done": False,
-    "validation_done": False,
-    "download_done": False,
 }
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
@@ -360,17 +393,12 @@ def candidate_display(row: Any) -> dict[str, Any]:
     return {"name": name, "skills": skills[:6], "summary": summary}
 
 
-def mark_downloaded() -> None:
-    st.session_state.download_done = True
-
 
 def checklist_state() -> list[tuple[int, str, bool]]:
     return [
         (1, "Candidate Sample", bool(st.session_state.candidate_ready)),
         (2, "Job Description", bool(st.session_state.job_ready)),
         (3, "Run Ranking", bool(st.session_state.ranking_done)),
-        (4, "Validate Final Top-100 Locally", bool(st.session_state.validation_done)),
-        (5, "Download CSV", bool(st.session_state.download_done)),
     ]
 
 
@@ -436,7 +464,7 @@ def render_hero() -> None:
         """
         <div class="hero-card">
           <h1 class="hero-title">Rank candidates with <span>offline AI logic</span>.</h1>
-          <p class="hero-copy">Upload candidates and a job description, run the deterministic ranker, validate top-100 output, and export CSV.</p>
+          <p class="hero-copy">Upload candidates and a job description, then run the deterministic offline ranker to generate a ranked CSV.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -448,13 +476,7 @@ def active_step() -> int:
         return 1
     if not st.session_state.job_ready:
         return 2
-    if not st.session_state.ranking_done:
-        return 3
-    if not st.session_state.validation_done:
-        return 4
-    if not st.session_state.download_done:
-        return 5
-    return 5
+    return 3
 
 
 def render_steps() -> None:
@@ -463,8 +485,6 @@ def render_steps() -> None:
         (1, "Upload Candidates", st.session_state.candidate_ready),
         (2, "Upload Job Description", st.session_state.job_ready),
         (3, "Run Ranking", st.session_state.ranking_done),
-        (4, "Validate Top-100", st.session_state.validation_done),
-        (5, "Download CSV", st.session_state.download_done),
     ]
     cards = []
     for index, title, done in step_defs:
@@ -547,19 +567,16 @@ def run_ranking(
         output_path = tmp / "sandbox_submission.csv"
         write_submission(rows, output_path)
         csv_text = output_path.read_text(encoding="utf-8")
-        official_errors = validate_submission(str(output_path)) if len(rows) == 100 else []
         progress.progress(100, text="Ranking complete.")
 
         st.session_state.rank_rows = rows
         st.session_state.rank_csv = csv_text
-        st.session_state.rank_errors = official_errors
+        st.session_state.rank_errors = []
         st.session_state.candidate_details = details
         st.session_state.last_run_summary = {"candidate_source": candidate_source, "job_source": job_source}
         st.session_state.candidate_ready = True
         st.session_state.job_ready = True
         st.session_state.ranking_done = True
-        st.session_state.validation_done = len(rows) == 100 and not official_errors
-        st.session_state.download_done = False
 
 
 def score_class(score: float) -> str:
@@ -636,23 +653,12 @@ def render_results() -> None:
     if summary:
         st.caption(f"Candidate source: {summary.get('candidate_source')} · Job source: {summary.get('job_source')}")
 
-    if len(rows) == 100:
-        if st.session_state.rank_errors:
-            st.warning("CSV generated, but official validator found issues:")
-            for error in st.session_state.rank_errors:
-                st.write(f"- {error}")
-        else:
-            st.success("Official validator passed.")
-    else:
-        st.info("Official validator requires exactly 100 rows. Validation completes only for a valid top-100 run.")
-
     st.download_button(
-        "Download ranked CSV",
+        "Export ranked CSV",
         data=st.session_state.rank_csv,
         file_name="sandbox_submission.csv",
         mime="text/csv",
         use_container_width=True,
-        on_click=mark_downloaded,
     )
 
     st.subheader("Top 3 candidates")
