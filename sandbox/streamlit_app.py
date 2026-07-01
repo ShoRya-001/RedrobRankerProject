@@ -12,7 +12,7 @@ import streamlit as st
 # Import the dependency-free ranker from the repository root.
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
-sys.path.insert(0, str(REPO_ROOT))
+    sys.path.insert(0, str(REPO_ROOT))
 
 from rank import iter_candidates, rank_candidates, write_submission  # noqa: E402
 from validate_submission import validate_submission  # noqa: E402
