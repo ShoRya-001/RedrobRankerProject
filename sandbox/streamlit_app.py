@@ -1725,14 +1725,9 @@ elif page == "Results":
 st.markdown(
     """
     <div class="footer-card">
-      <div>
-        <strong>Built for the Redrob AI Challenge</strong><br>
-        Offline Candidate Ranking Engine · Version 1.0
-      </div>
-      <div class="footer-links">
-        <a href="https://github.com/" target="_blank">GitHub</a>
-        <a href="#" target="_self">Documentation</a>
-      </div>
+        <p style="margin:0; text-align:center; color:#9ca3af; font-size:14px;">
+            Made with ❤️ by <strong style="color:white;">Core4</strong>
+        </p>
     </div>
     """,
     unsafe_allow_html=True,
