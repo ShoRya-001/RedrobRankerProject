@@ -700,6 +700,14 @@ def render_bottom_info() -> None:
         )
 
 
+def go_to_upload_rank() -> None:
+    st.session_state.page = "Upload & Rank"
+
+
+def toggle_docs() -> None:
+    st.session_state.show_docs = not st.session_state.show_docs
+
+
 render_topbar()
 
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
@@ -716,12 +724,9 @@ render_hero()
 
 cta_cols = st.columns([1, 1, 4])
 with cta_cols[0]:
-    if st.button("Run Demo", use_container_width=True):
-        st.session_state.page = "Upload & Rank"
-        st.rerun()
+    st.button("Run Demo", use_container_width=True, on_click=go_to_upload_rank)
 with cta_cols[1]:
-    if st.button("Documentation", use_container_width=True):
-        st.session_state.show_docs = not st.session_state.show_docs
+    st.button("Documentation", use_container_width=True, on_click=toggle_docs)
 
 st.write("")
 stat_cols = st.columns(4)
