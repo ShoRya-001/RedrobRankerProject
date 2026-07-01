@@ -28,55 +28,79 @@ st.set_page_config(
 CUSTOM_CSS = """
 <style>
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --accent: #1DB954;
-  --accent-hover: #23D564;
-  --accent-soft: rgba(29, 185, 84, 0.14);
-  --accent-bg: rgba(29, 185, 84, 0.08);
-  --accent-border: rgba(29, 185, 84, 0.34);
-
-  --info: #4F8DFF;
+  --accent-hover: #22D660;
+  --accent-soft: rgba(29, 185, 84, 0.12);
+  --accent-border: rgba(29, 185, 84, 0.28);
+  --info: #2563EB;
+  --info-soft: rgba(37, 99, 235, 0.12);
   --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.15);
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --error: #EF4444;
+  --error-soft: rgba(239, 68, 68, 0.12);
 
-  --bg: #090909;
-  --bg-2: #121212;
-  --surface: #171717;
-  --surface-2: #1D1D1D;
-  --surface-hover: #252525;
-  --glass: rgba(26, 26, 26, 0.78);
+  --bg: #F8F9FA;
+  --bg-2: #F2F3F5;
+  --surface: #FFFFFF;
+  --surface-2: #F7F8FA;
+  --surface-hover: #EEF1F4;
+  --glass: rgba(255, 255, 255, 0.82);
+  --border: #E5E7EB;
+  --border-soft: rgba(17, 24, 39, 0.08);
+  --text: #111827;
+  --text-2: #4B5563;
+  --muted: #6B7280;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #111827;
+  --sidebar-muted: #4B5563;
+  --shadow: 0 18px 55px rgba(17, 24, 39, 0.10);
+  --shadow-2: 0 10px 28px rgba(17, 24, 39, 0.08);
+  --code-bg: #111827;
+  --code-text: #ECFDF5;
+}
 
-  --border: rgba(255, 255, 255, 0.10);
-  --border-soft: rgba(255, 255, 255, 0.08);
-  --text: #F5F5F5;
-  --text-2: #C8C8C8;
-  --muted: #9A9A9A;
-
-  --sidebar-bg: #080808;
-  --sidebar-text: #F5F5F5;
-  --sidebar-muted: #B1B1B1;
-
-  --shadow: 0 26px 78px rgba(0,0,0,0.48);
-  --shadow-2: 0 16px 44px rgba(0,0,0,0.36);
-  --code-bg: #060606;
-  --code-text: #E5E7EB;
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #121212;
+    --bg-2: #181818;
+    --surface: #202020;
+    --surface-2: #181818;
+    --surface-hover: #282828;
+    --glass: rgba(32, 32, 32, 0.82);
+    --border: rgba(255,255,255,0.08);
+    --border-soft: rgba(255,255,255,0.08);
+    --text: #FFFFFF;
+    --text-2: #B3B3B3;
+    --muted: #8A8A8A;
+    --sidebar-bg: #000000;
+    --sidebar-text: #FFFFFF;
+    --sidebar-muted: #B3B3B3;
+    --shadow: 0 22px 70px rgba(0,0,0,0.45);
+    --shadow-2: 0 12px 32px rgba(0,0,0,0.35);
+    --code-bg: #050505;
+    --code-text: #E5E7EB;
+  }
 }
 
 * {
-  transition: background-color 210ms ease, border-color 210ms ease, box-shadow 230ms ease, transform 180ms ease, color 160ms ease, opacity 180ms ease;
+  transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 180ms ease, color 160ms ease, opacity 180ms ease;
 }
 
 .stApp {
   background:
-    radial-gradient(circle at 12% 8%, rgba(29,185,84,0.10), transparent 30rem),
-    radial-gradient(circle at 92% 2%, rgba(69,95,255,0.09), transparent 26rem),
+    radial-gradient(circle at 12% 8%, rgba(29, 185, 84, 0.13), transparent 28rem),
+    radial-gradient(circle at 92% 0%, rgba(37, 99, 235, 0.08), transparent 24rem),
+    radial-gradient(circle at 50% 100%, rgba(29, 185, 84, 0.07), transparent 30rem),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
   color: var(--text);
   font-family: Inter, Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
 }
 
 .block-container {
-  width: min(94%, 1480px);
+  width: 92%;
+  max-width: 1480px;
   padding-top: 1.15rem;
   padding-bottom: 2.5rem;
 }
@@ -88,11 +112,13 @@ CUSTOM_CSS = """
 [data-testid="stSidebar"] {
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
-  box-shadow: 12px 0 36px rgba(0,0,0,0.42);
+  box-shadow: 10px 0 34px rgba(0,0,0,0.08);
 }
+
 [data-testid="stSidebar"] * {
   color: var(--sidebar-text) !important;
 }
+
 [data-testid="stSidebar"] small,
 [data-testid="stSidebar"] .stCaptionContainer,
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
@@ -102,16 +128,18 @@ CUSTOM_CSS = """
 section[data-testid="stSidebar"] div[role="radiogroup"] label {
   min-height: 46px;
   padding: 0.65rem 0.75rem;
-  border-radius: 14px;
+  border-radius: 16px;
   margin-bottom: 0.34rem;
   background: transparent;
   border: 1px solid transparent;
 }
+
 section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
   background: var(--surface-hover);
   border-color: var(--border);
   transform: translateX(2px);
 }
+
 section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
   background: var(--accent-soft);
   border-color: var(--accent-border);
@@ -120,10 +148,12 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 h1, h2, h3, h4, h5, h6, p, li, label, span, div {
   color: var(--text);
 }
+
 p, li {
   color: var(--text-2);
   line-height: 1.68;
 }
+
 h1, h2, h3 {
   letter-spacing: -0.045em;
 }
@@ -136,6 +166,7 @@ a { color: var(--accent) !important; }
   gap: 12px;
   margin: 8px 0 10px;
 }
+
 .sidebar-logo {
   width: 44px;
   height: 44px;
@@ -144,14 +175,16 @@ a { color: var(--accent) !important; }
   place-items: center;
   background: var(--accent);
   color: #000000;
-  box-shadow: 0 12px 32px rgba(29,185,84,0.30);
+  box-shadow: 0 12px 32px rgba(29,185,84,0.28);
 }
+
 .sidebar-title {
-  font-size: 1.13rem;
+  font-size: 1.15rem;
   line-height: 1.1;
   font-weight: 950;
   letter-spacing: -0.04em;
 }
+
 .sidebar-copy {
   margin: 0 0 16px;
   color: var(--sidebar-muted) !important;
@@ -163,47 +196,55 @@ a { color: var(--accent) !important; }
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin: 8px 0;
+  margin: 8px 0 8px;
   color: var(--sidebar-muted) !important;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   font-weight: 800;
 }
+
 .check-progress-track {
   height: 8px;
   width: 100%;
   border-radius: 999px;
   overflow: hidden;
-  background: #1E1E1E;
+  background: var(--surface-hover);
   border: 1px solid var(--border);
   margin-bottom: 14px;
 }
+
 .check-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), #83EAA3);
+  background: linear-gradient(90deg, var(--accent), #7DE39B);
   animation: progressIn 420ms ease both;
 }
+
 .checklist-wrap {
   display: grid;
   gap: 10px;
 }
+
 .check-item {
   display: grid;
-  grid-template-columns: 33px 1fr;
+  grid-template-columns: 32px 1fr;
   gap: 11px;
   align-items: center;
   min-height: 40px;
+  color: var(--sidebar-muted);
+  font-size: 0.92rem;
 }
+
 .check-dot {
   width: 27px;
   height: 27px;
   border-radius: 999px;
   display: grid;
   place-items: center;
-  border: 2px solid rgba(255,255,255,0.24);
+  border: 2px solid color-mix(in srgb, var(--sidebar-muted) 58%, transparent);
   color: transparent;
   font-weight: 950;
 }
+
 .check-dot.done {
   border-color: var(--accent);
   background: var(--accent);
@@ -211,21 +252,10 @@ a { color: var(--accent) !important; }
   box-shadow: 0 10px 24px rgba(29,185,84,0.28);
   animation: tickPop 260ms ease both;
 }
-.check-dot.current {
-  border-color: rgba(29,185,84,0.58);
-  box-shadow: 0 0 0 2px rgba(29,185,84,0.22);
-}
-.check-label {
-  color: var(--sidebar-muted) !important;
-  font-size: 0.92rem;
-}
+
 .check-label.done {
   color: var(--sidebar-text) !important;
   font-weight: 850;
-}
-.check-label.current {
-  color: #D4FBE2 !important;
-  font-weight: 860;
 }
 
 .spotify-shell {
@@ -235,22 +265,25 @@ a { color: var(--accent) !important; }
   margin-bottom: 14px;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: color-mix(in srgb, var(--glass) 90%, transparent);
+  background: color-mix(in srgb, var(--glass) 88%, transparent);
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow-2);
   padding: 12px 16px;
 }
+
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
+
 .brand-lockup {
   display: flex;
   align-items: center;
   gap: 11px;
 }
+
 .brand-icon {
   width: 40px;
   height: 40px;
@@ -259,25 +292,29 @@ a { color: var(--accent) !important; }
   place-items: center;
   background: var(--accent);
   color: #000;
-  box-shadow: 0 12px 32px rgba(29,185,84,0.30);
+  box-shadow: 0 12px 32px rgba(29,185,84,0.28);
 }
+
 .brand-title {
-  font-weight: 960;
+  font-weight: 950;
   letter-spacing: -0.05em;
   font-size: 1.05rem;
   color: var(--text);
 }
+
 .brand-subtitle {
   font-size: 0.80rem;
   color: var(--muted);
   font-weight: 750;
 }
+
 .topbar-badges {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -291,6 +328,7 @@ a { color: var(--accent) !important; }
   font-weight: 850;
   white-space: nowrap;
 }
+
 .badge-green {
   background: var(--accent-soft);
   border-color: var(--accent-border);
@@ -303,97 +341,91 @@ a { color: var(--accent) !important; }
   border-radius: 22px;
   border: 1px solid var(--border);
   background:
-    radial-gradient(circle at 86% 6%, rgba(29,185,84,0.18), transparent 18rem),
-    linear-gradient(135deg, #141414 0%, #1B1B1B 100%);
+    radial-gradient(circle at 88% 4%, rgba(29,185,84,0.18), transparent 18rem),
+    linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
   box-shadow: var(--shadow);
-  padding: clamp(1.3rem, 3vw, 1.95rem);
+  padding: clamp(1.15rem, 3vw, 1.65rem);
   margin-bottom: 16px;
+  animation: fadeSlide 280ms ease both;
 }
+
 .hero-card:before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(29,185,84,0.08), transparent 42%);
+  background: linear-gradient(90deg, rgba(29,185,84,0.07), transparent 42%);
   pointer-events: none;
 }
+
 .hero-content {
   position: relative;
   z-index: 1;
 }
+
 .hero-title {
   max-width: 850px;
   margin: 0;
   color: var(--text);
-  font-size: clamp(2rem, 4.3vw, 4.5rem);
+  font-size: clamp(2rem, 4.2vw, 4.6rem);
   line-height: 0.98;
   letter-spacing: -0.075em;
   font-weight: 980;
 }
+
 .gradient-text {
-  background: linear-gradient(90deg, var(--accent), #82ECA2 60%, var(--text));
+  background: linear-gradient(90deg, var(--accent), #7DE39B 60%, var(--text));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
 .hero-subtitle {
   max-width: 760px;
-  margin-top: 13px;
+  margin-top: 12px;
   margin-bottom: 0;
   color: var(--text-2);
-  font-size: 1.03rem;
+  font-size: 1.02rem;
   line-height: 1.58;
 }
 
-.quick-card, .glass-card, .method-card, .success-card, .empty-state, .step-card, .status-card {
+.quick-card, .glass-card, .method-card, .success-card, .empty-state, .step-card {
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--glass);
   box-shadow: var(--shadow-2);
   padding: 18px;
+  height: 100%;
   backdrop-filter: blur(14px);
-  animation: fadeSlide 250ms ease both;
+  animation: fadeSlide 260ms ease both;
 }
-.quick-card:hover, .glass-card:hover, .method-card:hover, .success-card:hover, .step-card:hover, .status-card:hover {
-  background: color-mix(in srgb, var(--surface-hover) 92%, transparent);
-  transform: translateY(-2px);
+
+.quick-card:hover, .glass-card:hover, .method-card:hover, .success-card:hover, .step-card:hover {
+  background: var(--surface-hover);
+  transform: translateY(-2px) scale(1.004);
   box-shadow: var(--shadow);
 }
 
-.step-flow {
-  margin-bottom: 10px;
-  color: var(--text-2);
-  font-size: 0.86rem;
-  font-weight: 760;
-}
-.step-flow strong {
-  color: #9AF3B7;
-  font-weight: 900;
-}
 .step-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
   gap: 12px;
   margin: 0 0 18px;
 }
+
 .step-card {
-  min-height: 118px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  min-height: 104px;
 }
+
 .step-card.completed {
   border-color: var(--accent-border);
-  background: linear-gradient(180deg, rgba(29,185,84,0.16), rgba(29,185,84,0.08));
-  box-shadow: 0 0 0 1px rgba(29,185,84,0.16), 0 0 26px rgba(29,185,84,0.16), var(--shadow-2);
+  background: var(--accent-soft);
 }
+
 .step-card.active {
-  border-color: rgba(29,185,84,0.54);
-  box-shadow: 0 0 0 2px rgba(29,185,84,0.18), 0 0 24px rgba(29,185,84,0.16), var(--shadow-2);
-  animation: activePulse 1.8s ease-in-out infinite;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px rgba(29,185,84,0.10), var(--shadow-2);
 }
-.step-card.future {
-  opacity: 0.76;
-}
+
 .step-kicker {
   color: var(--muted);
   font-size: 0.70rem;
@@ -401,6 +433,7 @@ a { color: var(--accent) !important; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+
 .step-title {
   margin-top: 8px;
   color: var(--text);
@@ -408,8 +441,9 @@ a { color: var(--accent) !important; }
   font-weight: 930;
   line-height: 1.2;
 }
+
 .step-check {
-  align-self: flex-end;
+  float: right;
   width: 24px;
   height: 24px;
   border-radius: 999px;
@@ -419,15 +453,6 @@ a { color: var(--accent) !important; }
   color: #000;
   font-weight: 950;
   animation: tickPop 260ms ease both;
-}
-.step-current-pill {
-  margin-top: 9px;
-  display: inline-flex;
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 900;
-  color: #A4F6BF;
 }
 
 .step-pill {
@@ -444,6 +469,7 @@ a { color: var(--accent) !important; }
   letter-spacing: 0.04em;
   margin-bottom: 12px;
 }
+
 .card-title {
   margin: 0 0 8px 0;
   color: var(--text);
@@ -451,10 +477,20 @@ a { color: var(--accent) !important; }
   font-weight: 950;
   letter-spacing: -0.035em;
 }
+
 .card-copy {
   margin: 0;
   color: var(--text-2);
   font-size: 0.92rem;
+}
+
+.status-card {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+  animation: fadeSlide 300ms ease both;
 }
 
 .status-icon {
@@ -463,6 +499,7 @@ a { color: var(--accent) !important; }
   margin-bottom: 10px;
   color: var(--accent);
 }
+
 .status-label {
   color: var(--muted);
   font-size: 0.69rem;
@@ -470,6 +507,7 @@ a { color: var(--accent) !important; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
+
 .status-value {
   color: var(--text);
   margin-top: 3px;
@@ -478,41 +516,31 @@ a { color: var(--accent) !important; }
   letter-spacing: -0.04em;
 }
 
-/* Buttons */
 .stButton > button {
   min-height: 46px !important;
+  border: 0 !important;
   border-radius: 999px !important;
   padding: 0.72rem 1.25rem !important;
   font-weight: 950 !important;
-}
-.stButton > button[kind="primary"] {
-  border: 1px solid transparent !important;
   color: #000000 !important;
   background: var(--accent) !important;
   box-shadow: 0 14px 34px rgba(29,185,84,0.24) !important;
 }
-.stButton > button[kind="primary"]:hover {
+
+.stButton > button:hover {
   background: var(--accent-hover) !important;
   color: #000000 !important;
   transform: translateY(-2px);
   box-shadow: 0 18px 44px rgba(29,185,84,0.32) !important;
 }
-.stButton > button[kind="secondary"] {
-  border: 1px solid var(--border) !important;
-  color: var(--text) !important;
-  background: transparent !important;
-}
-.stButton > button[kind="secondary"]:hover {
-  border-color: var(--accent-border) !important;
-  box-shadow: 0 0 0 2px rgba(29,185,84,0.12) !important;
-  transform: translateY(-1px);
-}
+
 .stButton > button:disabled {
   background: var(--surface-hover) !important;
   color: var(--muted) !important;
   box-shadow: none !important;
   cursor: not-allowed !important;
 }
+
 .stButton > button:focus-visible,
 .stDownloadButton > button:focus-visible,
 button:focus-visible,
@@ -531,55 +559,45 @@ textarea:focus-visible {
   background: var(--accent-soft) !important;
 }
 
-/* Upload shells */
-.upload-shell {
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.02);
-  padding: 14px;
-  margin-top: 2px;
-}
-.upload-title {
-  font-size: 1.06rem;
-  font-weight: 930;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-}
-.upload-copy {
-  font-size: 0.9rem;
-  color: var(--text-2);
-  margin-bottom: 10px;
-}
-.upload-support {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 0.82rem;
+/* UPDATED: uploader visual polish only */
+[data-testid="stFileUploader"] section {
+  border: 2px dashed rgba(29, 185, 84, 0.72) !important;
+  border-radius: 20px !important;
+  background: rgba(29, 185, 84, 0.12) !important;
+  padding: 18px !important;
+  box-shadow: inset 0 0 0 1px rgba(29, 185, 84, 0.14), 0 10px 28px rgba(0, 0, 0, 0.16);
 }
 
-[data-testid="stFileUploader"] section {
-  border: 1.5px dashed rgba(29,185,84,0.46) !important;
-  border-radius: 18px !important;
-  background: rgba(29,185,84,0.07) !important;
-  padding: 1.35rem !important;
-  min-height: 180px !important;
-  box-shadow: inset 0 0 0 1px rgba(29,185,84,0.10), 0 12px 36px rgba(0,0,0,0.24);
-}
 [data-testid="stFileUploader"] section:hover {
-  border-color: var(--accent) !important;
-  background: rgba(29,185,84,0.12) !important;
-  box-shadow: 0 0 0 3px rgba(29,185,84,0.14), 0 16px 40px rgba(0,0,0,0.30);
+  border-color: #1DB954 !important;
+  background: rgba(29, 185, 84, 0.18) !important;
+  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.20), 0 16px 36px rgba(0, 0, 0, 0.20);
 }
+
 [data-testid="stFileUploader"] button {
+  background: #1DB954 !important;
+  color: #0B0B0B !important;
+  border: 1px solid rgba(29, 185, 84, 0.78) !important;
   border-radius: 12px !important;
-  min-height: 46px !important;
-  padding: 0.62rem 1rem !important;
+  min-height: 48px !important;
+  padding: 0.68rem 1.25rem !important;
   font-weight: 900 !important;
+  font-size: 0.95rem !important;
+  box-shadow: 0 10px 24px rgba(29, 185, 84, 0.28) !important;
+  cursor: pointer !important;
 }
+
+[data-testid="stFileUploader"] button:hover {
+  background: #23D564 !important;
+  color: #060606 !important;
+  border-color: #23D564 !important;
+  box-shadow: 0 14px 30px rgba(29, 185, 84, 0.34) !important;
+}
+
 [data-testid="stFileUploader"] small,
 [data-testid="stFileUploader"] span,
 [data-testid="stFileUploader"] p {
   color: var(--text-2) !important;
-  font-size: 0.93rem !important;
 }
 
 textarea, input {
@@ -588,10 +606,12 @@ textarea, input {
   background: var(--surface) !important;
   border-color: var(--border) !important;
 }
+
 textarea::placeholder, input::placeholder {
   color: var(--muted) !important;
   opacity: 1 !important;
 }
+
 textarea:focus, input:focus {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px rgba(29,185,84,0.16) !important;
@@ -604,10 +624,12 @@ textarea:focus, input:focus {
   box-shadow: var(--shadow-2);
   padding: 16px;
 }
+
 [data-testid="stMetricLabel"] p {
   color: var(--text-2) !important;
   font-weight: 800;
 }
+
 [data-testid="stMetricValue"] {
   color: var(--text) !important;
   font-weight: 950 !important;
@@ -627,17 +649,17 @@ pre, code {
 
 .success-card {
   display: grid;
-  grid-template-columns: 52px 1fr;
+  grid-template-columns: 42px 1fr;
   gap: 14px;
   align-items: start;
-  margin-top: 8px;
-  border-color: rgba(29,185,84,0.52);
-  background: linear-gradient(180deg, rgba(29,185,84,0.16), rgba(29,185,84,0.08));
-  box-shadow: 0 0 0 1px rgba(29,185,84,0.15), 0 0 30px rgba(29,185,84,0.17), var(--shadow-2);
+  margin-top: 12px;
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
 }
+
 .success-icon {
-  width: 46px;
-  height: 46px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -646,34 +668,17 @@ pre, code {
   font-weight: 950;
   animation: tickPop 260ms ease both;
 }
+
 .success-title {
   font-weight: 950;
   color: var(--text);
   margin-bottom: 4px;
-  font-size: 1rem;
-}
-.success-meta {
-  color: var(--text-2);
-  font-size: 0.9rem;
-  line-height: 1.56;
 }
 
-.ready-banner {
-  margin-top: 14px;
-  border-radius: 16px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-bg);
-  padding: 14px 16px;
-  box-shadow: 0 10px 30px rgba(29,185,84,0.14);
-}
-.ready-title {
-  color: var(--text);
-  font-weight: 920;
-}
-.ready-copy {
+.success-meta {
   color: var(--text-2);
-  margin-top: 3px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
 }
 
 .sticky-run-panel {
@@ -696,12 +701,14 @@ pre, code {
   background: var(--surface);
   box-shadow: var(--shadow-2);
 }
+
 .results-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   min-width: 980px;
 }
+
 .results-table thead th {
   position: sticky;
   top: 0;
@@ -715,24 +722,30 @@ pre, code {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
 }
+
 .results-table tbody tr:nth-child(even) {
-  background: color-mix(in srgb, var(--surface-2) 56%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
 }
+
 .results-table tbody tr:hover {
   background: var(--surface-hover);
 }
+
 .results-table tbody tr.top-three {
-  background: color-mix(in srgb, var(--accent-soft) 56%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
 }
+
 .results-table tbody tr.rank-one {
   box-shadow: inset 4px 0 0 #D4AF37;
 }
+
 .results-table td {
   color: var(--text-2);
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-soft);
   vertical-align: top;
 }
+
 .results-table .candidate-id {
   color: var(--text);
   font-weight: 900;
@@ -749,6 +762,7 @@ pre, code {
   color: #000;
   background: var(--accent);
 }
+
 .rank-chip.gold {
   background: linear-gradient(135deg, #FDE68A, #D4AF37);
 }
@@ -762,9 +776,10 @@ pre, code {
   padding: 6px 10px;
   font-weight: 950;
 }
-.score-high { background: rgba(29,185,84,0.20); color: var(--accent); }
+
+.score-high { background: rgba(29,185,84,0.18); color: var(--accent); }
 .score-mid { background: var(--warning-soft); color: var(--warning); }
-.score-low { background: rgba(107,114,128,0.18); color: var(--text-2); }
+.score-low { background: rgba(107,114,128,0.14); color: var(--text-2); }
 
 .match-track {
   height: 10px;
@@ -774,6 +789,7 @@ pre, code {
   overflow: hidden;
   margin-top: 8px;
 }
+
 .match-fill {
   height: 100%;
   border-radius: 999px;
@@ -787,7 +803,7 @@ pre, code {
   border-radius: 999px;
   padding: 5px 9px;
   margin: 0 5px 5px 0;
-  background: rgba(79,141,255,0.16);
+  background: var(--info-soft);
   color: var(--text);
   font-size: 0.78rem;
   font-weight: 800;
@@ -799,6 +815,7 @@ pre, code {
   gap: 14px;
   margin: 18px 0;
 }
+
 .preview-card {
   border-radius: 20px;
   border: 1px solid var(--border);
@@ -808,14 +825,17 @@ pre, code {
   min-height: 220px;
   animation: fadeSlide 300ms ease both;
 }
+
 .preview-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.004);
   background: var(--surface-hover);
 }
+
 .preview-card.rank-one {
   border-color: rgba(212, 175, 55, 0.62);
   box-shadow: 0 18px 56px rgba(212,175,55,0.14), var(--shadow-2);
 }
+
 .preview-rank {
   color: var(--muted);
   font-size: 0.76rem;
@@ -823,6 +843,7 @@ pre, code {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+
 .preview-name {
   margin-top: 10px;
   color: var(--text);
@@ -830,6 +851,7 @@ pre, code {
   font-weight: 950;
   letter-spacing: -0.04em;
 }
+
 .preview-score {
   margin: 12px 0;
   font-size: 2rem;
@@ -845,6 +867,7 @@ pre, code {
   place-items: center;
   text-align: center;
 }
+
 .empty-illustration {
   width: 94px;
   height: 94px;
@@ -870,6 +893,7 @@ pre, code {
   gap: 12px;
   color: var(--text-2);
 }
+
 .footer-links {
   display: flex;
   gap: 14px;
@@ -884,30 +908,25 @@ hr { border-color: var(--border) !important; }
   70% { transform: scale(1.12); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
+
 @keyframes fadeSlide {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes progressIn {
   from { width: 0; }
 }
-@keyframes activePulse {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-1px); }
+
+@media (max-width: 980px) {
+  .step-grid, .preview-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 1100px) {
-  .step-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 980px) {
-  .preview-grid { grid-template-columns: 1fr; }
-}
 @media (max-width: 760px) {
   .topbar { align-items: flex-start; flex-direction: column; }
   .topbar-badges { justify-content: flex-start; }
   .hero-title { font-size: 2.35rem; }
   .footer-card { flex-direction: column; }
-  .step-grid { grid-template-columns: 1fr; }
 }
 </style>
 """
@@ -937,14 +956,6 @@ for key, value in DEFAULT_STATE.items():
         st.session_state[key] = value
 
 
-if "use_repo_sample" not in st.session_state:
-    st.session_state.use_repo_sample = sample_candidates_path.exists()
-if "use_repo_job" not in st.session_state:
-    st.session_state.use_repo_job = sample_job_path.exists()
-if "job_text_widget" not in st.session_state:
-    st.session_state.job_text_widget = ""
-
-
 def icon_svg(name: str, size: int = 20) -> str:
     icons = {
         "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
@@ -961,7 +972,8 @@ def icon_svg(name: str, size: int = 20) -> str:
     return (
         f'<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" '
         f'stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
-        f'{icons.get(name, icons["target"])}</svg>'
+        f'{icons.get(name, icons["target"])}'
+        f"</svg>"
     )
 
 
@@ -977,12 +989,14 @@ def format_bytes(size: int | float | None) -> str:
 
 
 def uploaded_job_to_text(uploaded_file) -> str:
+    """Read uploaded TXT/MD/DOCX job descriptions as plain text for the sandbox."""
+
     suffix = Path(uploaded_file.name).suffix.lower()
     data = uploaded_file.getvalue()
     if suffix == ".docx":
         try:
             from docx import Document
-        except ImportError as exc:
+        except ImportError as exc:  # pragma: no cover - deployment dependency guard
             raise RuntimeError("DOCX support requires python-docx. Add python-docx to requirements.txt.") from exc
 
         document = Document(BytesIO(data))
@@ -1011,18 +1025,16 @@ def count_candidates(path: Path) -> int | None:
 
 
 def candidate_success_card(file_name: str, file_size: int | None, candidate_count: int | None) -> None:
-    count_text = f"{candidate_count} Candidates Loaded" if candidate_count is not None else "Candidates Loaded"
+    count_line = f"<br>Detected candidates: <strong>{candidate_count}</strong>" if candidate_count is not None else ""
     st.markdown(
         f"""
         <div class="success-card">
-          <div class="success-icon">{icon_svg("check", 20)}</div>
+          <div class="success-icon">{icon_svg("check", 18)}</div>
           <div>
-            <div class="success-title">Candidate Uploaded</div>
+            <div class="success-title">Candidate sample uploaded</div>
             <div class="success-meta">
-              <strong>{html.escape(file_name)}</strong><br>
-              {format_bytes(file_size)}<br>
-              {html.escape(count_text)}<br>
-              Ready for Ranking
+              {html.escape(file_name)} · {format_bytes(file_size)}{count_line}<br>
+              Upload completed successfully.
             </div>
           </div>
         </div>
@@ -1031,16 +1043,15 @@ def candidate_success_card(file_name: str, file_size: int | None, candidate_coun
     )
 
 
-def job_success_card(file_name: str, file_size: int | None, source_note: str = "Ready for Ranking") -> None:
+def job_success_card(file_name: str, file_size: int | None, source_note: str = "Upload completed successfully.") -> None:
     st.markdown(
         f"""
         <div class="success-card">
-          <div class="success-icon">{icon_svg("check", 20)}</div>
+          <div class="success-icon">{icon_svg("check", 18)}</div>
           <div>
-            <div class="success-title">Job Description Uploaded</div>
+            <div class="success-title">Job description ready</div>
             <div class="success-meta">
-              <strong>{html.escape(file_name)}</strong><br>
-              {format_bytes(file_size)}<br>
+              {html.escape(file_name)} · {format_bytes(file_size)}<br>
               {html.escape(source_note)}
             </div>
           </div>
@@ -1101,27 +1112,13 @@ def mark_downloaded() -> None:
     st.session_state.download_done = True
 
 
-def sync_candidate_ready() -> None:
-    use_repo = bool(st.session_state.get("use_repo_sample", sample_candidates_path.exists()))
-    upload = st.session_state.get("candidate_upload_widget")
-    st.session_state.candidate_ready = bool(use_repo or upload is not None)
-
-
-def sync_job_ready() -> None:
-    use_repo = bool(st.session_state.get("use_repo_job", sample_job_path.exists()))
-    upload = st.session_state.get("job_upload_widget")
-    text = str(st.session_state.get("job_text_widget", "")).strip()
-    st.session_state.job_ready = bool(use_repo or upload is not None or text)
-
-
-def checklist_item(index: int, label: str, done: bool, current: bool) -> str:
+def checklist_item(index: int, label: str, done: bool) -> str:
     dot = "✓" if done else ""
-    dot_class = "done" if done else ("current" if current else "")
-    label_class = "done" if done else ("current" if current else "")
+    done_class = "done" if done else ""
     return (
         f'<div class="check-item">'
-        f'<div class="check-dot {dot_class}">{dot}</div>'
-        f'<div class="check-label {label_class}">{index}. {html.escape(label)}</div>'
+        f'<div class="check-dot {done_class}">{dot}</div>'
+        f'<div class="check-label {done_class}">{index}. {html.escape(label)}</div>'
         f"</div>"
     )
 
@@ -1140,22 +1137,11 @@ def render_checklist() -> None:
     items = checklist_state()
     completed = sum(1 for _, _, done in items if done)
     percent = int(completed / len(items) * 100)
-
-    current_idx = None
-    for idx, _, done in items:
-        if not done:
-            current_idx = idx
-            break
-
-    list_html = "".join(
-        checklist_item(idx, label, done, current=(idx == current_idx and not done)) for idx, label, done in items
-    )
-
     st.markdown(
         f"""
         <div class="check-progress-label"><span>{completed} / {len(items)} Completed</span><span>{percent}%</span></div>
         <div class="check-progress-track"><div class="check-progress-fill" style="width:{percent}%"></div></div>
-        <div class="checklist-wrap">{list_html}</div>
+        <div class="checklist-wrap">{''.join(checklist_item(*item) for item in items)}</div>
         """,
         unsafe_allow_html=True,
     )
@@ -1204,9 +1190,9 @@ def render_hero() -> None:
         """
         <div class="hero-card">
           <div class="hero-content">
-            <h1 class="hero-title">Redrob Candidate Ranker<br><span class="gradient-text">offline AI ranking dashboard</span>.</h1>
+            <h1 class="hero-title">Rank candidates with <span class="gradient-text">offline AI logic</span>.</h1>
             <p class="hero-subtitle">
-              Upload candidates and a job description, run deterministic ranking, validate top-100 output, and export CSV.
+              Upload candidates and a job description, run the deterministic Redrob ranker, validate top-100 output, and export CSV.
             </p>
           </div>
         </div>
@@ -1221,16 +1207,11 @@ def step_status(index: int, title: str, done: bool, active: bool) -> str:
         classes += " completed"
     elif active:
         classes += " active"
-    else:
-        classes += " future"
-
     check = '<span class="step-check">✓</span>' if done else ""
-    current = '<span class="step-current-pill">Current Step</span>' if active and not done else ""
     return (
         f'<div class="{classes}">{check}'
         f'<div class="step-kicker">STEP {index}</div>'
         f'<div class="step-title">{html.escape(title)}</div>'
-        f"{current}"
         f"</div>"
     )
 
@@ -1259,24 +1240,7 @@ def render_steps() -> None:
         (5, "Download CSV", st.session_state.download_done),
     ]
     html_steps = "".join(step_status(i, title, done, active == i and not done) for i, title, done in step_defs)
-
-    flow_parts = []
-    for index, title, done in step_defs:
-        if done:
-            flow_parts.append(f"<strong>✓ {html.escape(title)}</strong>")
-        elif active == index:
-            flow_parts.append(f"Current Step: {html.escape(title)}")
-        else:
-            flow_parts.append(html.escape(title))
-    flow_line = " ↓ ".join(flow_parts)
-
-    st.markdown(
-        f"""
-        <div class="step-flow">{flow_line}</div>
-        <div class="step-grid">{html_steps}</div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown(f'<div class="step-grid">{html_steps}</div>', unsafe_allow_html=True)
 
 
 def run_ranking(
@@ -1495,10 +1459,6 @@ def render_results() -> None:
     render_results_table(rows)
 
 
-# keep readiness synced globally so sidebar/checklist/steps update immediately
-sync_candidate_ready()
-sync_job_ready()
-
 with st.sidebar:
     st.markdown(
         f"""
@@ -1530,11 +1490,11 @@ render_hero()
 
 cta_cols = st.columns([1, 1, 4])
 with cta_cols[0]:
-    if st.button("Run Demo", type="primary", use_container_width=True):
+    if st.button("Run Demo", use_container_width=True):
         st.session_state.nav_choice = "Run Ranker"
         st.rerun()
 with cta_cols[1]:
-    if st.button("Documentation", type="secondary", use_container_width=True):
+    if st.button("Documentation", use_container_width=True):
         st.session_state.show_docs = not st.session_state.show_docs
 
 status_cols = st.columns(4)
@@ -1574,113 +1534,56 @@ elif page == "Run Ranker":
     left, right = st.columns(2)
 
     with left:
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<span class="step-pill">STEP 1 · Upload Candidates</span>', unsafe_allow_html=True)
-
-        st.checkbox(
-            "Use bundled sample_candidates.json",
-            key="use_repo_sample",
-            on_change=sync_candidate_ready,
-        )
-        use_repo_sample = bool(st.session_state.use_repo_sample)
-
+        use_repo_sample = sample_candidates_path.exists() and st.checkbox("Use bundled sample_candidates.json", value=True)
         candidate_upload = None
-        if use_repo_sample:
-            candidate_success_card(
-                "sample_candidates.json",
-                sample_candidates_path.stat().st_size if sample_candidates_path.exists() else None,
-                count_candidates(sample_candidates_path) if sample_candidates_path.exists() else None,
-            )
-        else:
-            st.markdown(
-                """
-                <div class="upload-shell">
-                  <div class="upload-title">Upload Candidate File</div>
-                  <div class="upload-copy">Drag & drop candidates or browse files.</div>
-                """,
-                unsafe_allow_html=True,
-            )
+        if not use_repo_sample:
             candidate_upload = st.file_uploader(
                 "Upload candidate sample",
                 type=["json", "jsonl", "ndjson", "txt", "gz"],
-                key="candidate_upload_widget",
-                label_visibility="collapsed",
                 help="Accepts JSON array, JSONL/NDJSON/TXT with one JSON object per line, or gzipped JSONL.",
-                on_change=sync_candidate_ready,
             )
-            st.markdown('<div class="upload-support">Supports: JSON · JSONL · NDJSON</div></div>', unsafe_allow_html=True)
-
-            if candidate_upload is not None:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=Path(candidate_upload.name).suffix or ".jsonl") as handle:
-                    handle.write(candidate_upload.getvalue())
-                    temp_candidate_path = Path(handle.name)
-                candidate_success_card(candidate_upload.name, candidate_upload.size, count_candidates(temp_candidate_path))
-                temp_candidate_path.unlink(missing_ok=True)
-
-        sync_candidate_ready()
+        st.session_state.candidate_ready = bool(use_repo_sample or candidate_upload is not None)
+        if use_repo_sample:
+            candidate_success_card("sample_candidates.json", sample_candidates_path.stat().st_size, count_candidates(sample_candidates_path))
+        elif candidate_upload is not None:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=Path(candidate_upload.name).suffix or ".jsonl") as handle:
+                handle.write(candidate_upload.getvalue())
+                temp_candidate_path = Path(handle.name)
+            candidate_success_card(candidate_upload.name, candidate_upload.size, count_candidates(temp_candidate_path))
+            temp_candidate_path.unlink(missing_ok=True)
         st.caption("Sandbox samples can be ≤100 candidates. Use the CLI for the official 100K run.")
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with right:
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<span class="step-pill">STEP 2 · Upload Job Description</span>', unsafe_allow_html=True)
-
-        st.checkbox(
-            "Use bundled A1.txt job description",
-            key="use_repo_job",
-            on_change=sync_job_ready,
-        )
-        use_repo_job = bool(st.session_state.use_repo_job)
-
+        use_repo_job = sample_job_path.exists() and st.checkbox("Use bundled A1.txt job description", value=True)
         job_upload = None
         job_text = ""
-        if use_repo_job:
-            job_success_card("A1.txt", sample_job_path.stat().st_size if sample_job_path.exists() else None)
-        else:
-            st.markdown(
-                """
-                <div class="upload-shell">
-                  <div class="upload-title">Upload Job Description</div>
-                  <div class="upload-copy">Drag & drop a file, or paste the description below.</div>
-                """,
-                unsafe_allow_html=True,
-            )
+        if not use_repo_job:
             job_upload = st.file_uploader(
                 "Upload job description",
                 type=["txt", "md", "docx"],
-                key="job_upload_widget",
-                label_visibility="collapsed",
                 help="DOCX files are parsed with python-docx; text and markdown are read directly.",
-                on_change=sync_job_ready,
             )
-            job_text = st.text_area(
-                "Or paste job description",
-                key="job_text_widget",
-                height=165,
-                placeholder="Paste the job description here...",
-                on_change=sync_job_ready,
-            )
-            st.markdown('<div class="upload-support">Supports: TXT · MD · DOCX</div></div>', unsafe_allow_html=True)
-
-            if job_upload is not None:
-                job_success_card(job_upload.name, job_upload.size)
-            elif job_text.strip():
-                job_success_card("Pasted job description", len(job_text.encode("utf-8")), "Ready for Ranking")
-
-        sync_job_ready()
+            job_text = st.text_area("Or paste job description", height=165, placeholder="Paste the job description here...")
+        st.session_state.job_ready = bool(use_repo_job or job_upload is not None or job_text.strip())
+        if use_repo_job:
+            job_success_card("A1.txt", sample_job_path.stat().st_size)
+        elif job_upload is not None:
+            job_success_card(job_upload.name, job_upload.size)
+        elif job_text.strip():
+            job_success_card("Pasted job description", len(job_text.encode("utf-8")), "Text entered successfully.")
         st.caption("DOCX, TXT, MD, or pasted text are supported.")
-        st.markdown("</div>", unsafe_allow_html=True)
 
     st.write("")
     top_k = st.slider(
         "Top K rows to generate",
         min_value=1,
         max_value=100,
-        value=50 if st.session_state.use_repo_sample else 100,
+        value=50 if use_repo_sample else 100,
         help="Official submission requires 100 rows. Small sandbox samples may contain fewer candidates.",
     )
     required_ready = bool(st.session_state.candidate_ready and st.session_state.job_ready)
-
     st.markdown('<div class="sticky-run-panel">', unsafe_allow_html=True)
     run_cols = st.columns([2, 1])
     with run_cols[0]:
@@ -1693,28 +1596,15 @@ elif page == "Run Ranker":
         )
     with run_cols[1]:
         run = st.button("Run Ranking", type="primary", use_container_width=True, disabled=not required_ready)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    if required_ready and not st.session_state.ranking_done and not run:
-        st.markdown(
-            """
-            <div class="ready-banner">
-              <div class="ready-title">✓ Everything Ready</div>
-              <div class="ready-copy">Candidate File Loaded</div>
-              <div class="ready-copy">Job Description Loaded</div>
-              <div class="ready-copy">Click Run Ranking to continue</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if run:
         run_ranking(
-            use_repo_sample=st.session_state.use_repo_sample,
-            candidate_upload=st.session_state.get("candidate_upload_widget"),
-            use_repo_job=st.session_state.use_repo_job,
-            job_upload=st.session_state.get("job_upload_widget"),
-            job_text=st.session_state.get("job_text_widget", ""),
+            use_repo_sample=use_repo_sample,
+            candidate_upload=candidate_upload,
+            use_repo_job=use_repo_job,
+            job_upload=job_upload,
+            job_text=job_text,
             top_k=top_k,
         )
         render_results()
