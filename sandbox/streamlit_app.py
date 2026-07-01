@@ -559,7 +559,7 @@ textarea:focus-visible {
   background: var(--accent-soft) !important;
 }
 
-/* UPDATED: uploader visual polish only */
+/* Uploader */
 [data-testid="stFileUploader"] section {
   border: 2px dashed rgba(29, 185, 84, 0.72) !important;
   border-radius: 20px !important;
@@ -901,6 +901,22 @@ pre, code {
   font-weight: 850;
 }
 
+.core4-footer {
+  margin-top: 28px;
+  min-height: 56px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  box-shadow: var(--shadow-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-2);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
 hr { border-color: var(--border) !important; }
 
 @keyframes tickPop {
@@ -954,6 +970,28 @@ DEFAULT_STATE = {
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
+
+if "use_repo_sample" not in st.session_state:
+    st.session_state.use_repo_sample = sample_candidates_path.exists()
+if "use_repo_job" not in st.session_state:
+    st.session_state.use_repo_job = sample_job_path.exists()
+if "job_text_input" not in st.session_state:
+    st.session_state.job_text_input = ""
+
+
+def sync_upload_readiness() -> None:
+    candidate_upload = st.session_state.get("candidate_upload_input")
+    use_repo_sample = bool(st.session_state.get("use_repo_sample", False))
+    st.session_state.candidate_ready = bool(
+        (use_repo_sample and sample_candidates_path.exists()) or (candidate_upload is not None)
+    )
+
+    job_upload = st.session_state.get("job_upload_input")
+    job_text = str(st.session_state.get("job_text_input", "")).strip()
+    use_repo_job = bool(st.session_state.get("use_repo_job", False))
+    st.session_state.job_ready = bool(
+        (use_repo_job and sample_job_path.exists()) or (job_upload is not None) or bool(job_text)
+    )
 
 
 def icon_svg(name: str, size: int = 20) -> str:
@@ -1303,7 +1341,7 @@ def run_ranking(
             progress.empty()
             st.error(str(exc))
             st.stop()
-        except Exception as exc:
+        except Exception as exc:  # pragma: no cover - defensive UI guard
             progress.empty()
             st.exception(exc)
             st.stop()
@@ -1459,6 +1497,8 @@ def render_results() -> None:
     render_results_table(rows)
 
 
+sync_upload_readiness()
+
 with st.sidebar:
     st.markdown(
         f"""
@@ -1535,15 +1575,16 @@ elif page == "Run Ranker":
 
     with left:
         st.markdown('<span class="step-pill">STEP 1 · Upload Candidates</span>', unsafe_allow_html=True)
-        use_repo_sample = sample_candidates_path.exists() and st.checkbox("Use bundled sample_candidates.json", value=True)
+        use_repo_sample = st.checkbox("Use bundled sample_candidates.json", key="use_repo_sample")
         candidate_upload = None
         if not use_repo_sample:
             candidate_upload = st.file_uploader(
                 "Upload candidate sample",
                 type=["json", "jsonl", "ndjson", "txt", "gz"],
                 help="Accepts JSON array, JSONL/NDJSON/TXT with one JSON object per line, or gzipped JSONL.",
+                key="candidate_upload_input",
             )
-        st.session_state.candidate_ready = bool(use_repo_sample or candidate_upload is not None)
+        sync_upload_readiness()
         if use_repo_sample:
             candidate_success_card("sample_candidates.json", sample_candidates_path.stat().st_size, count_candidates(sample_candidates_path))
         elif candidate_upload is not None:
@@ -1556,7 +1597,7 @@ elif page == "Run Ranker":
 
     with right:
         st.markdown('<span class="step-pill">STEP 2 · Upload Job Description</span>', unsafe_allow_html=True)
-        use_repo_job = sample_job_path.exists() and st.checkbox("Use bundled A1.txt job description", value=True)
+        use_repo_job = st.checkbox("Use bundled A1.txt job description", key="use_repo_job")
         job_upload = None
         job_text = ""
         if not use_repo_job:
@@ -1564,9 +1605,15 @@ elif page == "Run Ranker":
                 "Upload job description",
                 type=["txt", "md", "docx"],
                 help="DOCX files are parsed with python-docx; text and markdown are read directly.",
+                key="job_upload_input",
             )
-            job_text = st.text_area("Or paste job description", height=165, placeholder="Paste the job description here...")
-        st.session_state.job_ready = bool(use_repo_job or job_upload is not None or job_text.strip())
+            job_text = st.text_area(
+                "Or paste job description",
+                height=165,
+                placeholder="Paste the job description here...",
+                key="job_text_input",
+            )
+        sync_upload_readiness()
         if use_repo_job:
             job_success_card("A1.txt", sample_job_path.stat().st_size)
         elif job_upload is not None:
@@ -1614,10 +1661,8 @@ elif page == "Results":
 
 st.markdown(
     """
-    <div class="footer-card">
-        <p style="margin:0; text-align:center; color:#9ca3af; font-size:14px;">
-            Made with ❤️ by <strong style="color:white;">Core4</strong>
-        </p>
+    <div class="core4-footer">
+      Made with ❤️ by Core4
     </div>
     """,
     unsafe_allow_html=True,
