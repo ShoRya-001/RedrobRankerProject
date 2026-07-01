@@ -215,37 +215,16 @@ textarea::placeholder, input::placeholder { color: var(--muted) !important; opac
 
 
 
-/* Make Streamlit dataframe toolbar icons (CSV, search, fullscreen) visible in light and dark mode. */
+/* Hide Streamlit's hover-only dataframe toolbar. Direct Export/Search/Large View controls are shown above the table instead. */
 [data-testid="stElementToolbar"] {
-  opacity: 1 !important;
-  visibility: visible !important;
-  background: color-mix(in srgb, var(--paper) 86%, transparent) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 999px !important;
-  box-shadow: var(--shadow-soft) !important;
-  backdrop-filter: blur(10px) !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
-[data-testid="stElementToolbar"] button,
-[data-testid="stElementToolbar"] [role="button"] {
-  color: var(--ink) !important;
-  background: var(--paper) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 999px !important;
-  opacity: 1 !important;
-}
-
-[data-testid="stElementToolbar"] svg,
-[data-testid="stElementToolbar"] path {
-  color: var(--ink) !important;
-  stroke: var(--ink) !important;
-  fill: none !important;
-  opacity: 1 !important;
-}
-
-[data-testid="stDataFrame"] button,
-[data-testid="stDataFrame"] [role="button"] {
-  color: var(--ink) !important;
+[data-testid="stDataFrame"] {
+  border-radius: 18px !important;
+  overflow: hidden !important;
 }
 
 @media (max-width: 980px) { .bento-grid, .step-grid, .preview-grid { grid-template-columns: 1fr 1fr; } }
@@ -653,14 +632,6 @@ def render_results() -> None:
     if summary:
         st.caption(f"Candidate source: {summary.get('candidate_source')} · Job source: {summary.get('job_source')}")
 
-    st.download_button(
-        "Export ranked CSV",
-        data=st.session_state.rank_csv,
-        file_name="sandbox_submission.csv",
-        mime="text/csv",
-        use_container_width=True,
-    )
-
     st.subheader("Top 3 candidates")
     render_preview_cards(rows)
 
@@ -678,10 +649,39 @@ def render_results() -> None:
                 "Reason": row.reasoning,
             }
         )
+
+    control_cols = st.columns([1.15, 2.1, 1])
+    with control_cols[0]:
+        st.download_button(
+            "Export ranked CSV",
+            data=st.session_state.rank_csv,
+            file_name="sandbox_submission.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    with control_cols[1]:
+        search_query = st.text_input(
+            "Search ranked candidates",
+            placeholder="Search by candidate, skill, score, or reason...",
+            label_visibility="collapsed",
+            key="results_search_query",
+        )
+    with control_cols[2]:
+        large_view = st.toggle("Large table view", value=True, key="large_results_table")
+
+    if search_query.strip():
+        query = search_query.lower().strip()
+        table_rows = [
+            row
+            for row in table_rows
+            if query in " ".join(str(value).lower() for value in row.values())
+        ]
+
     st.dataframe(
         table_rows,
         use_container_width=True,
         hide_index=True,
+        height=680 if large_view else 420,
         column_config={
             "Match Score": st.column_config.ProgressColumn("Match Score", min_value=0, max_value=100, format="%.1f%%"),
         },
@@ -802,6 +802,10 @@ elif page == "Upload & Rank":
             job_text=job_text,
             top_k=top_k,
         )
+        st.rerun()
+
+    if st.session_state.ranking_done and st.session_state.rank_rows:
+        st.write("")
         render_results()
 
 elif page == "Results":
