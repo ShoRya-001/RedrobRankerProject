@@ -234,7 +234,6 @@ DEFAULT_STATE = {
     "ranking_done": False,
     "validation_done": False,
     "download_done": False,
-    "show_docs": False,
 }
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
@@ -683,22 +682,6 @@ def render_results() -> None:
     )
 
 
-def render_bottom_info() -> None:
-    with st.expander("Additional information and reproduction commands", expanded=bool(st.session_state.show_docs)):
-        st.markdown("### Official reproduction command")
-        st.code(
-            "python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100\n"
-            "python validate_submission.py ./team_yourid.csv",
-            language="bash",
-        )
-        st.markdown("### Methodology summary")
-        st.write(
-            "The ranker combines retrieval/ranking evidence, embeddings/vector database skills, applied ML/NLP depth, "
-            "production engineering, product-company experience, seniority fit, logistics, and Redrob behavioral signals. "
-            "It down-weights keyword stuffing, inactive candidates, consulting-only histories, long notice periods, suspicious profiles, "
-            "and unsupported AI claims."
-        )
-
 
 render_topbar()
 
@@ -714,15 +697,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 render_hero()
 
-cta_cols = st.columns([1, 1, 4])
-with cta_cols[0]:
-    if st.button("Run Demo", use_container_width=True):
-        page = "Upload & Rank"
-with cta_cols[1]:
-    if st.button("Documentation", use_container_width=True):
-        st.session_state.show_docs = not st.session_state.show_docs
-
-st.write("")
 stat_cols = st.columns(4)
 with stat_cols[0]:
     bento_card("Candidates", "Max 100", "◎")
@@ -827,7 +801,6 @@ elif page == "Upload & Rank":
 elif page == "Results":
     render_results()
 
-render_bottom_info()
 
 st.markdown(
     """
@@ -837,8 +810,7 @@ st.markdown(
         Offline Candidate Ranking Engine · Version 1.0
       </div>
       <div class="footer-links">
-        <a href="https://github.com/" target="_blank">GitHub</a>
-        <a href="#" target="_self">Documentation</a>
+        <a href="https://github.com/ShoRya-001/RedrobRankerProject" target="_blank">GitHub</a>
       </div>
     </div>
     """,
