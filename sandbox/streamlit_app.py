@@ -819,8 +819,13 @@ st.markdown(
         <strong>Built for the Redrob AI Challenge</strong><br>
         Offline Candidate Ranking Engine · Version 1.0
       </div>
+
       <div class="footer-links">
         <a href="https://github.com/ShoRya-001/RedrobRankerProject" target="_blank">GitHub</a>
+      </div>
+
+      <div style="width:100%; text-align:center; margin-top:12px; font-size:14px; color:#bdbdbd;">
+        Made with ❤️ by <strong>Core4</strong>
       </div>
     </div>
     """,
