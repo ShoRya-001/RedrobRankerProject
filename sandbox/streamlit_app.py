@@ -7,10 +7,12 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import streamlit as st
 
 # Import the dependency-free ranker from the repository root.
 REPO_ROOT = Path(__file__).resolve().parents[1]
+APP_DIR = Path(__file__).resolve().parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -20,42 +22,44 @@ from validate_submission import validate_submission  # noqa: E402
 
 st.set_page_config(
     page_title="Redrob Candidate Ranker",
-    page_icon="◉",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
+
 
 CUSTOM_CSS = """
 <style>
 :root {
   color-scheme: light;
-  --bg: #FAF7EF;
-  --bg-2: #F2EBDD;
-  --surface: #FFFDF8;
-  --surface-2: #F7F0E6;
-  --surface-3: #EFE3D0;
-  --hover: #F0E6D8;
-  --glass: rgba(255, 253, 248, 0.78);
-  --border: rgba(67, 55, 38, 0.12);
-  --border-strong: rgba(67, 55, 38, 0.20);
-  --text: #201A13;
-  --text-2: #4F463A;
-  --muted: #766B5C;
-  --green: #1DB954;
-  --green-dark: #157A38;
-  --green-soft: rgba(29, 185, 84, 0.12);
-  --green-border: rgba(29, 185, 84, 0.28);
-  --blue: #2563EB;
-  --blue-soft: rgba(37, 99, 235, 0.12);
-  --orange: #D97706;
-  --orange-soft: rgba(217, 119, 6, 0.14);
-  --red: #DC2626;
-  --red-soft: rgba(220, 38, 38, 0.12);
-  --gold: #D4AF37;
-  --shadow: 0 20px 60px rgba(58, 45, 27, 0.13);
-  --shadow-soft: 0 10px 28px rgba(58, 45, 27, 0.09);
-  --code-bg: #211A12;
-  --code-text: #FFF7E8;
+  --accent: #1DB954;
+  --accent-hover: #22D660;
+  --accent-soft: rgba(29, 185, 84, 0.12);
+  --accent-border: rgba(29, 185, 84, 0.28);
+  --info: #2563EB;
+  --info-soft: rgba(37, 99, 235, 0.12);
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --error: #EF4444;
+  --error-soft: rgba(239, 68, 68, 0.12);
+
+  --bg: #F8F9FA;
+  --bg-2: #F2F3F5;
+  --surface: #FFFFFF;
+  --surface-2: #F7F8FA;
+  --surface-hover: #EEF1F4;
+  --glass: rgba(255, 255, 255, 0.82);
+  --border: #E5E7EB;
+  --border-soft: rgba(17, 24, 39, 0.08);
+  --text: #111827;
+  --text-2: #4B5563;
+  --muted: #6B7280;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #111827;
+  --sidebar-muted: #4B5563;
+  --shadow: 0 18px 55px rgba(17, 24, 39, 0.10);
+  --shadow-2: 0 10px 28px rgba(17, 24, 39, 0.08);
+  --code-bg: #111827;
+  --code-text: #ECFDF5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -65,26 +69,18 @@ CUSTOM_CSS = """
     --bg-2: #181818;
     --surface: #202020;
     --surface-2: #181818;
-    --surface-3: #282828;
-    --hover: #282828;
-    --glass: rgba(32, 32, 32, 0.80);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.15);
+    --surface-hover: #282828;
+    --glass: rgba(32, 32, 32, 0.82);
+    --border: rgba(255,255,255,0.08);
+    --border-soft: rgba(255,255,255,0.08);
     --text: #FFFFFF;
     --text-2: #B3B3B3;
     --muted: #8A8A8A;
-    --green: #1DB954;
-    --green-dark: #1DB954;
-    --green-soft: rgba(29, 185, 84, 0.14);
-    --green-border: rgba(29, 185, 84, 0.34);
-    --blue: #60A5FA;
-    --blue-soft: rgba(96, 165, 250, 0.14);
-    --orange: #F59E0B;
-    --orange-soft: rgba(245, 158, 11, 0.16);
-    --red: #EF4444;
-    --red-soft: rgba(239, 68, 68, 0.14);
-    --shadow: 0 24px 70px rgba(0, 0, 0, 0.44);
-    --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.32);
+    --sidebar-bg: #000000;
+    --sidebar-text: #FFFFFF;
+    --sidebar-muted: #B3B3B3;
+    --shadow: 0 22px 70px rgba(0,0,0,0.45);
+    --shadow-2: 0 12px 32px rgba(0,0,0,0.35);
     --code-bg: #050505;
     --code-text: #E5E7EB;
   }
@@ -96,9 +92,9 @@ CUSTOM_CSS = """
 
 .stApp {
   background:
-    radial-gradient(circle at 12% 8%, rgba(29, 185, 84, 0.11), transparent 28rem),
-    radial-gradient(circle at 86% 0%, rgba(217, 119, 6, 0.08), transparent 22rem),
-    radial-gradient(circle at 50% 100%, rgba(37, 99, 235, 0.06), transparent 30rem),
+    radial-gradient(circle at 12% 8%, rgba(29, 185, 84, 0.13), transparent 28rem),
+    radial-gradient(circle at 92% 0%, rgba(37, 99, 235, 0.08), transparent 24rem),
+    radial-gradient(circle at 50% 100%, rgba(29, 185, 84, 0.07), transparent 30rem),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
   color: var(--text);
   font-family: Inter, Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
@@ -107,13 +103,48 @@ CUSTOM_CSS = """
 .block-container {
   width: 92%;
   max-width: 1480px;
-  padding-top: 1.05rem;
+  padding-top: 1.15rem;
   padding-bottom: 2.5rem;
 }
 
-#MainMenu, footer, header[data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="collapsedControl"] {
-  display: none !important;
-  visibility: hidden !important;
+#MainMenu, footer, header[data-testid="stHeader"] {
+  visibility: hidden;
+}
+
+[data-testid="stSidebar"] {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  box-shadow: 10px 0 34px rgba(0,0,0,0.08);
+}
+
+[data-testid="stSidebar"] * {
+  color: var(--sidebar-text) !important;
+}
+
+[data-testid="stSidebar"] small,
+[data-testid="stSidebar"] .stCaptionContainer,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+  color: var(--sidebar-muted) !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label {
+  min-height: 46px;
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  margin-bottom: 0.34rem;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+  background: var(--surface-hover);
+  border-color: var(--border);
+  transform: translateX(2px);
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
 }
 
 h1, h2, h3, h4, h5, h6, p, li, label, span, div {
@@ -129,19 +160,117 @@ h1, h2, h3 {
   letter-spacing: -0.045em;
 }
 
-a { color: var(--green-dark) !important; }
+a { color: var(--accent) !important; }
 
-.top-shell {
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 10px;
+}
+
+.sidebar-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #000000;
+  box-shadow: 0 12px 32px rgba(29,185,84,0.28);
+}
+
+.sidebar-title {
+  font-size: 1.15rem;
+  line-height: 1.1;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.sidebar-copy {
+  margin: 0 0 16px;
+  color: var(--sidebar-muted) !important;
+  font-size: 0.91rem;
+}
+
+.check-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 8px;
+  color: var(--sidebar-muted) !important;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.check-progress-track {
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+
+.check-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #7DE39B);
+  animation: progressIn 420ms ease both;
+}
+
+.checklist-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.check-item {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 11px;
+  align-items: center;
+  min-height: 40px;
+  color: var(--sidebar-muted);
+  font-size: 0.92rem;
+}
+
+.check-dot {
+  width: 27px;
+  height: 27px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 2px solid color-mix(in srgb, var(--sidebar-muted) 58%, transparent);
+  color: transparent;
+  font-weight: 950;
+}
+
+.check-dot.done {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 10px 24px rgba(29,185,84,0.28);
+  animation: tickPop 260ms ease both;
+}
+
+.check-label.done {
+  color: var(--sidebar-text) !important;
+  font-weight: 850;
+}
+
+.spotify-shell {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 20;
   margin-bottom: 14px;
   border: 1px solid var(--border);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--glass) 90%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--glass) 88%, transparent);
   backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-soft);
-  padding: 14px 16px;
+  box-shadow: var(--shadow-2);
+  padding: 12px 16px;
 }
 
 .topbar {
@@ -154,24 +283,24 @@ a { color: var(--green-dark) !important; }
 .brand-lockup {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
 }
 
 .brand-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
   display: grid;
   place-items: center;
-  color: #000000;
-  background: var(--green);
-  box-shadow: 0 12px 30px rgba(29,185,84,0.26);
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 12px 32px rgba(29,185,84,0.28);
 }
 
 .brand-title {
   font-weight: 950;
   letter-spacing: -0.05em;
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   color: var(--text);
 }
 
@@ -203,38 +332,9 @@ a { color: var(--green-dark) !important; }
 }
 
 .badge-green {
-  background: var(--green-soft);
-  border-color: var(--green-border);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
   color: var(--text);
-}
-
-.nav-wrap {
-  margin: -2px 0 16px;
-}
-
-.nav-wrap div[role="radiogroup"] {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.nav-wrap div[role="radiogroup"] label {
-  border-radius: 999px !important;
-  min-height: 42px;
-  padding: 0.55rem 0.85rem !important;
-  border: 1px solid var(--border) !important;
-  background: var(--surface) !important;
-  box-shadow: var(--shadow-soft);
-}
-
-.nav-wrap div[role="radiogroup"] label:hover {
-  transform: translateY(-1px);
-  background: var(--hover) !important;
-}
-
-.nav-wrap div[role="radiogroup"] label:has(input:checked) {
-  background: var(--green-soft) !important;
-  border-color: var(--green-border) !important;
 }
 
 .hero-card {
@@ -243,26 +343,39 @@ a { color: var(--green-dark) !important; }
   border-radius: 22px;
   border: 1px solid var(--border);
   background:
-    radial-gradient(circle at 88% 4%, rgba(29,185,84,0.14), transparent 18rem),
+    radial-gradient(circle at 88% 4%, rgba(29,185,84,0.18), transparent 18rem),
     linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
   box-shadow: var(--shadow);
-  padding: clamp(1rem, 2.4vw, 1.45rem);
-  margin-bottom: 14px;
-  animation: fadeSlide 260ms ease both;
+  padding: clamp(1.15rem, 3vw, 1.65rem);
+  margin-bottom: 16px;
+  animation: fadeSlide 280ms ease both;
+}
+
+.hero-card:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(29,185,84,0.07), transparent 42%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-title {
-  max-width: 920px;
+  max-width: 850px;
   margin: 0;
   color: var(--text);
-  font-size: clamp(1.9rem, 3.8vw, 4rem);
-  line-height: 0.99;
-  letter-spacing: -0.072em;
+  font-size: clamp(2rem, 4.2vw, 4.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.075em;
   font-weight: 980;
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, var(--green-dark), #6DDC91 58%, var(--text));
+  background: linear-gradient(90deg, var(--accent), #7DE39B 60%, var(--text));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -270,76 +383,28 @@ a { color: var(--green-dark) !important; }
 
 .hero-subtitle {
   max-width: 760px;
-  margin-top: 10px;
+  margin-top: 12px;
   margin-bottom: 0;
   color: var(--text-2);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 1.02rem;
+  line-height: 1.58;
 }
 
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin: 14px 0 18px;
-}
-
-.bento-card, .glass-card, .success-card, .empty-state, .step-card, .footer-card, .info-card {
+.quick-card, .glass-card, .method-card, .success-card, .empty-state, .step-card {
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--glass);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-2);
   padding: 18px;
+  height: 100%;
   backdrop-filter: blur(14px);
   animation: fadeSlide 260ms ease both;
 }
 
-.bento-card:hover, .glass-card:hover, .success-card:hover, .step-card:hover, .info-card:hover {
-  background: var(--hover);
-  transform: translateY(-2px) scale(1.003);
+.quick-card:hover, .glass-card:hover, .method-card:hover, .success-card:hover, .step-card:hover {
+  background: var(--surface-hover);
+  transform: translateY(-2px) scale(1.004);
   box-shadow: var(--shadow);
-}
-
-.bento-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 12px;
-  color: var(--green-dark);
-  background: var(--green-soft);
-  border: 1px solid var(--green-border);
-}
-
-.bento-label, .status-label {
-  color: var(--muted);
-  font-size: 0.70rem;
-  font-weight: 950;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.bento-value, .status-value {
-  color: var(--text);
-  margin-top: 5px;
-  font-size: 1.25rem;
-  font-weight: 950;
-  letter-spacing: -0.04em;
-}
-
-.card-title {
-  margin: 0 0 8px 0;
-  color: var(--text);
-  font-size: 1.08rem;
-  font-weight: 950;
-  letter-spacing: -0.035em;
-}
-
-.card-copy {
-  margin: 0;
-  color: var(--text-2);
-  font-size: 0.94rem;
 }
 
 .step-grid {
@@ -354,13 +419,13 @@ a { color: var(--green-dark) !important; }
 }
 
 .step-card.completed {
-  border-color: var(--green-border);
-  background: var(--green-soft);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
 }
 
 .step-card.active {
-  border-color: var(--green-border);
-  box-shadow: 0 0 0 3px rgba(29,185,84,0.10), var(--shadow-soft);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px rgba(29,185,84,0.10), var(--shadow-2);
 }
 
 .step-kicker {
@@ -386,87 +451,10 @@ a { color: var(--green-dark) !important; }
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: var(--green);
+  background: var(--accent);
   color: #000;
   font-weight: 950;
   animation: tickPop 260ms ease both;
-}
-
-.checklist-card {
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--glass);
-  box-shadow: var(--shadow-soft);
-  padding: 18px;
-  backdrop-filter: blur(14px);
-  height: 100%;
-}
-
-.check-progress-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 0 8px;
-  color: var(--text-2);
-  font-size: 0.86rem;
-  font-weight: 850;
-}
-
-.check-progress-track {
-  height: 9px;
-  width: 100%;
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--surface-hover);
-  border: 1px solid var(--border);
-  margin-bottom: 14px;
-}
-
-.check-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--green), #7DE39B);
-  animation: progressIn 420ms ease both;
-}
-
-.checklist-wrap {
-  display: grid;
-  gap: 10px;
-}
-
-.check-item {
-  display: grid;
-  grid-template-columns: 32px 1fr;
-  gap: 11px;
-  align-items: center;
-  min-height: 38px;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.check-dot {
-  width: 27px;
-  height: 27px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  border: 2px solid color-mix(in srgb, var(--muted) 58%, transparent);
-  color: transparent;
-  font-weight: 950;
-}
-
-.check-dot.done {
-  border-color: var(--green);
-  background: var(--green);
-  color: #000;
-  box-shadow: 0 10px 24px rgba(29,185,84,0.28);
-  animation: tickPop 260ms ease both;
-}
-
-.check-label.done {
-  color: var(--text);
-  font-weight: 850;
 }
 
 .step-pill {
@@ -476,12 +464,58 @@ a { color: var(--green-dark) !important; }
   padding: 7px 11px;
   border-radius: 999px;
   color: var(--text);
-  background: var(--green-soft);
-  border: 1px solid var(--green-border);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
   font-size: 0.75rem;
   font-weight: 900;
   letter-spacing: 0.04em;
   margin-bottom: 12px;
+}
+
+.card-title {
+  margin: 0 0 8px 0;
+  color: var(--text);
+  font-size: 1.08rem;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+
+.card-copy {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.92rem;
+}
+
+.status-card {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+  animation: fadeSlide 300ms ease both;
+}
+
+.status-icon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+.status-label {
+  color: var(--muted);
+  font-size: 0.69rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.status-value {
+  color: var(--text);
+  margin-top: 3px;
+  font-size: 1.28rem;
+  font-weight: 950;
+  letter-spacing: -0.04em;
 }
 
 .stButton > button {
@@ -491,19 +525,19 @@ a { color: var(--green-dark) !important; }
   padding: 0.72rem 1.25rem !important;
   font-weight: 950 !important;
   color: #000000 !important;
-  background: var(--green) !important;
-  box-shadow: 0 14px 34px rgba(29,185,84,0.22) !important;
+  background: var(--accent) !important;
+  box-shadow: 0 14px 34px rgba(29,185,84,0.24) !important;
 }
 
 .stButton > button:hover {
-  background: #22D660 !important;
+  background: var(--accent-hover) !important;
   color: #000000 !important;
   transform: translateY(-2px);
-  box-shadow: 0 18px 44px rgba(29,185,84,0.30) !important;
+  box-shadow: 0 18px 44px rgba(29,185,84,0.32) !important;
 }
 
 .stButton > button:disabled {
-  background: var(--surface-3) !important;
+  background: var(--surface-hover) !important;
   color: var(--muted) !important;
   box-shadow: none !important;
   cursor: not-allowed !important;
@@ -522,21 +556,21 @@ textarea:focus-visible {
   min-height: 46px !important;
   border-radius: 999px !important;
   font-weight: 950 !important;
-  border: 1px solid var(--green-border) !important;
+  border: 1px solid var(--accent-border) !important;
   color: var(--text) !important;
-  background: var(--green-soft) !important;
+  background: var(--accent-soft) !important;
 }
 
 [data-testid="stFileUploader"] section {
-  border: 1.5px dashed var(--green-border) !important;
+  border: 1.5px dashed var(--accent-border) !important;
   border-radius: 20px !important;
-  background: color-mix(in srgb, var(--surface-2) 88%, var(--green) 12%) !important;
+  background: color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%) !important;
   padding: 18px !important;
 }
 
 [data-testid="stFileUploader"] section:hover {
-  border-color: var(--green) !important;
-  background: var(--hover) !important;
+  border-color: var(--accent) !important;
+  background: var(--surface-hover) !important;
   box-shadow: 0 0 0 3px rgba(29,185,84,0.08);
 }
 
@@ -559,7 +593,7 @@ textarea::placeholder, input::placeholder {
 }
 
 textarea:focus, input:focus {
-  border-color: var(--green) !important;
+  border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px rgba(29,185,84,0.16) !important;
 }
 
@@ -567,7 +601,7 @@ textarea:focus, input:focus {
   border-radius: 18px;
   border: 1px solid var(--border);
   background: var(--glass);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-2);
   padding: 16px;
 }
 
@@ -599,8 +633,8 @@ pre, code {
   gap: 14px;
   align-items: start;
   margin-top: 12px;
-  border-color: var(--green-border);
-  background: var(--green-soft);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
 }
 
 .success-icon {
@@ -610,7 +644,7 @@ pre, code {
   display: grid;
   place-items: center;
   color: #000;
-  background: var(--green);
+  background: var(--accent);
   font-weight: 950;
   animation: tickPop 260ms ease both;
 }
@@ -639,174 +673,6 @@ pre, code {
   padding: 14px;
 }
 
-.results-table-wrap {
-  margin-top: 18px;
-  overflow-x: auto;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: var(--shadow-soft);
-}
-
-.results-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 980px;
-}
-
-.results-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.results-table tbody tr:nth-child(even) {
-  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
-}
-
-.results-table tbody tr:hover {
-  background: var(--hover);
-}
-
-.results-table tbody tr.top-three {
-  background: color-mix(in srgb, var(--green-soft) 58%, transparent);
-}
-
-.results-table tbody tr.rank-one {
-  box-shadow: inset 4px 0 0 var(--gold);
-}
-
-.results-table td {
-  color: var(--text-2);
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border-soft);
-  vertical-align: top;
-}
-
-.results-table .candidate-id {
-  color: var(--text);
-  font-weight: 900;
-}
-
-.rank-chip {
-  display: inline-flex;
-  width: 34px;
-  height: 34px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  font-weight: 950;
-  color: #000;
-  background: var(--green);
-}
-
-.rank-chip.gold {
-  background: linear-gradient(135deg, #FDE68A, var(--gold));
-}
-
-.score-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 72px;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-weight: 950;
-}
-
-.score-high { background: rgba(29,185,84,0.18); color: var(--green-dark); }
-.score-mid { background: var(--orange-soft); color: var(--orange); }
-.score-low { background: rgba(107,114,128,0.14); color: var(--text-2); }
-
-.match-track {
-  height: 10px;
-  min-width: 140px;
-  border-radius: 999px;
-  background: var(--surface-hover);
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-.match-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--green), #7DE39B);
-  animation: progressIn 580ms ease both;
-}
-
-.skill-chip {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 5px 9px;
-  margin: 0 5px 5px 0;
-  background: var(--blue-soft);
-  color: var(--text);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.preview-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 18px 0;
-}
-
-.preview-card {
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--glass);
-  box-shadow: var(--shadow-soft);
-  padding: 18px;
-  min-height: 220px;
-  animation: fadeSlide 300ms ease both;
-}
-
-.preview-card:hover {
-  transform: translateY(-2px) scale(1.004);
-  background: var(--hover);
-}
-
-.preview-card.rank-one {
-  border-color: rgba(212, 175, 55, 0.62);
-  box-shadow: 0 18px 56px rgba(212,175,55,0.14), var(--shadow-soft);
-}
-
-.preview-rank {
-  color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.preview-name {
-  margin-top: 10px;
-  color: var(--text);
-  font-size: 1.18rem;
-  font-weight: 950;
-  letter-spacing: -0.04em;
-}
-
-.preview-score {
-  margin: 12px 0;
-  font-size: 2rem;
-  line-height: 1;
-  font-weight: 980;
-  letter-spacing: -0.06em;
-  color: var(--green-dark);
-}
-
 .empty-state {
   min-height: 320px;
   display: grid;
@@ -821,13 +687,18 @@ pre, code {
   display: grid;
   place-items: center;
   margin: 0 auto 18px;
-  background: var(--green-soft);
-  color: var(--green-dark);
-  border: 1px solid var(--green-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
 }
 
 .footer-card {
   margin-top: 28px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  box-shadow: var(--shadow-2);
+  padding: 16px 18px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -860,14 +731,13 @@ hr { border-color: var(--border) !important; }
 }
 
 @media (max-width: 980px) {
-  .bento-grid, .step-grid, .preview-grid { grid-template-columns: 1fr 1fr; }
+  .step-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
   .topbar { align-items: flex-start; flex-direction: column; }
   .topbar-badges { justify-content: flex-start; }
-  .hero-title { font-size: 2.15rem; }
-  .bento-grid, .step-grid, .preview-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 2.35rem; }
   .footer-card { flex-direction: column; }
 }
 </style>
@@ -876,8 +746,21 @@ hr { border-color: var(--border) !important; }
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 
-sample_candidates_path = REPO_ROOT / "uploads" / "sample_candidates.json"
-sample_job_path = REPO_ROOT / "uploads" / "A1.txt"
+def resolve_bundled_path(filename: str) -> Path:
+    """Streamlit Cloud-safe bundled file resolver."""
+    candidates = [
+        APP_DIR / "uploads" / filename,
+        REPO_ROOT / "uploads" / filename,
+        APP_DIR / filename,
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return APP_DIR / "uploads" / filename
+
+
+sample_candidates_path = resolve_bundled_path("sample_candidates.json")
+sample_job_path = resolve_bundled_path("A1.txt")
 
 DEFAULT_STATE = {
     "rank_rows": [],
@@ -891,14 +774,17 @@ DEFAULT_STATE = {
     "validation_done": False,
     "download_done": False,
     "show_docs": False,
-    "page": "Overview",
+    "nav_choice": "Overview",
+    "ranked_df": None,
+    "top3_df": None,
+    "csv_bytes": None,
 }
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
 
-def icon_svg(name: str, size: int = 22) -> str:
+def icon_svg(name: str, size: int = 20) -> str:
     icons = {
         "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
         "upload": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
@@ -931,13 +817,12 @@ def format_bytes(size: int | float | None) -> str:
 
 def uploaded_job_to_text(uploaded_file) -> str:
     """Read uploaded TXT/MD/DOCX job descriptions as plain text for the sandbox."""
-
     suffix = Path(uploaded_file.name).suffix.lower()
     data = uploaded_file.getvalue()
     if suffix == ".docx":
         try:
             from docx import Document
-        except ImportError as exc:  # pragma: no cover - deployment dependency guard
+        except ImportError as exc:
             raise RuntimeError("DOCX support requires python-docx. Add python-docx to requirements.txt.") from exc
 
         document = Document(BytesIO(data))
@@ -1049,18 +934,27 @@ def candidate_display(row: Any) -> dict[str, Any]:
     return {"name": name, "title": title, "skills": skills[:6], "summary": summary}
 
 
+def build_ranked_dataframe(rows: list[Any]) -> pd.DataFrame:
+    output: list[dict[str, Any]] = []
+    for rank, row in enumerate(rows, start=1):
+        data = candidate_display(row)
+        output.append(
+            {
+                "Rank": rank,
+                "Candidate ID": row.candidate_id,
+                "Candidate Name": data["name"],
+                "Title": data["title"],
+                "Score": float(row.score),
+                "Match %": round(float(row.score) * 100, 2),
+                "Skills": ", ".join(data["skills"]) if data["skills"] else "",
+                "Reasoning": row.reasoning,
+            }
+        )
+    return pd.DataFrame(output)
+
+
 def mark_downloaded() -> None:
     st.session_state.download_done = True
-
-
-def checklist_state() -> list[tuple[int, str, bool]]:
-    return [
-        (1, "Candidate Sample", bool(st.session_state.candidate_ready)),
-        (2, "Job Description", bool(st.session_state.job_ready)),
-        (3, "Run Ranking", bool(st.session_state.ranking_done)),
-        (4, "Validate Final Top-100 Locally", bool(st.session_state.validation_done)),
-        (5, "Download CSV", bool(st.session_state.download_done)),
-    ]
 
 
 def checklist_item(index: int, label: str, done: bool) -> str:
@@ -1070,35 +964,41 @@ def checklist_item(index: int, label: str, done: bool) -> str:
         f'<div class="check-item">'
         f'<div class="check-dot {done_class}">{dot}</div>'
         f'<div class="check-label {done_class}">{index}. {html.escape(label)}</div>'
-        f'</div>'
+        f"</div>"
     )
 
 
-def render_checklist_card() -> None:
+def checklist_state() -> list[tuple[int, str, bool]]:
+    return [
+        (1, "Candidate sample", bool(st.session_state.candidate_ready)),
+        (2, "Job description", bool(st.session_state.job_ready)),
+        (3, "Run ranking", bool(st.session_state.ranking_done)),
+        (4, "Validate final top-100 locally", bool(st.session_state.validation_done)),
+        (5, "Download CSV", bool(st.session_state.download_done)),
+    ]
+
+
+def render_checklist() -> None:
     items = checklist_state()
     completed = sum(1 for _, _, done in items if done)
     percent = int(completed / len(items) * 100)
     st.markdown(
         f"""
-        <div class="checklist-card">
-          <div class="card-title">Live checklist</div>
-          <p class="card-copy">Complete each step to generate a submission-ready ranking.</p>
-          <div class="check-progress-label"><span>{completed} / {len(items)} Completed</span><span>{percent}%</span></div>
-          <div class="check-progress-track"><div class="check-progress-fill" style="width:{percent}%"></div></div>
-          <div class="checklist-wrap">{''.join(checklist_item(*item) for item in items)}</div>
-        </div>
+        <div class="check-progress-label"><span>{completed} / {len(items)} Completed</span><span>{percent}%</span></div>
+        <div class="check-progress-track"><div class="check-progress-fill" style="width:{percent}%"></div></div>
+        <div class="checklist-wrap">{''.join(checklist_item(*item) for item in items)}</div>
         """,
         unsafe_allow_html=True,
     )
 
 
-def bento_card(label: str, value: str, icon_name: str) -> None:
+def status_html(label: str, value: str, icon_name: str) -> None:
     st.markdown(
         f"""
-        <div class="bento-card">
-          <div class="bento-icon">{icon_svg(icon_name, 28)}</div>
-          <div class="bento-label">{html.escape(label)}</div>
-          <div class="bento-value">{html.escape(value)}</div>
+        <div class="status-card">
+          <div class="status-icon">{icon_svg(icon_name, 28)}</div>
+          <div class="status-label">{html.escape(label)}</div>
+          <div class="status-value">{html.escape(value)}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -1108,7 +1008,7 @@ def bento_card(label: str, value: str, icon_name: str) -> None:
 def render_topbar() -> None:
     st.markdown(
         f"""
-        <div class="top-shell">
+        <div class="spotify-shell">
           <div class="topbar">
             <div class="brand-lockup">
               <div class="brand-icon">{icon_svg("target", 20)}</div>
@@ -1134,10 +1034,12 @@ def render_hero() -> None:
     st.markdown(
         """
         <div class="hero-card">
-          <h1 class="hero-title">Rank candidates with <span class="gradient-text">offline AI logic</span>.</h1>
-          <p class="hero-subtitle">
-            Upload candidates and a job description, run the deterministic Redrob ranker, validate top-100 output, and export CSV.
-          </p>
+          <div class="hero-content">
+            <h1 class="hero-title">Rank candidates with <span class="gradient-text">offline AI logic</span>.</h1>
+            <p class="hero-subtitle">
+              Upload candidates and a job description, run the deterministic Redrob ranker, validate top-100 output, and export CSV.
+            </p>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -1155,7 +1057,7 @@ def step_status(index: int, title: str, done: bool, active: bool) -> str:
         f'<div class="{classes}">{check}'
         f'<div class="step-kicker">STEP {index}</div>'
         f'<div class="step-title">{html.escape(title)}</div>'
-        f'</div>'
+        f"</div>"
     )
 
 
@@ -1199,6 +1101,9 @@ def run_ranking(
         tmp = Path(tmpdir)
 
         if use_repo_sample:
+            if not sample_candidates_path.is_file():
+                st.error("Bundled sample_candidates.json not found. Please upload a candidate file.")
+                st.stop()
             candidates_path = sample_candidates_path
             candidate_source = "bundled sample_candidates.json"
         elif candidate_upload is not None:
@@ -1211,6 +1116,9 @@ def run_ranking(
             st.stop()
 
         if use_repo_job:
+            if not sample_job_path.is_file():
+                st.error("Bundled A1.txt not found. Please upload or paste a job description.")
+                st.stop()
             job_path = sample_job_path
             job_source = "bundled A1.txt"
         elif job_upload is not None:
@@ -1246,7 +1154,7 @@ def run_ranking(
             progress.empty()
             st.error(str(exc))
             st.stop()
-        except Exception as exc:  # pragma: no cover - defensive UI guard
+        except Exception as exc:
             progress.empty()
             st.exception(exc)
             st.stop()
@@ -1262,10 +1170,17 @@ def run_ranking(
         official_errors = validate_submission(str(output_path)) if len(rows) == 100 else []
         progress.progress(100, text="Ranking complete.")
 
+        ranked_df = build_ranked_dataframe(rows)
+        top3_df = ranked_df.head(3).copy()
+        csv_bytes = ranked_df.to_csv(index=False).encode("utf-8")
+
         st.session_state.rank_rows = rows
         st.session_state.rank_csv = csv_text
         st.session_state.rank_errors = official_errors
         st.session_state.candidate_details = details
+        st.session_state.ranked_df = ranked_df
+        st.session_state.top3_df = top3_df
+        st.session_state.csv_bytes = csv_bytes
         st.session_state.last_run_summary = {
             "candidate_source": candidate_source,
             "job_source": job_source,
@@ -1280,72 +1195,29 @@ def run_ranking(
         st.session_state.download_done = False
 
 
-def score_class(score: float) -> str:
-    if score >= 0.70:
-        return "score-high"
-    if score >= 0.40:
-        return "score-mid"
-    return "score-low"
+def render_top3_cards(df: pd.DataFrame) -> None:
+    top = df.head(3)
+    cols = st.columns(3)
+    for i in range(3):
+        with cols[i]:
+            with st.container(border=True):
+                if i < len(top):
+                    row = top.iloc[i]
+                    st.caption(f"Rank #{int(row['Rank'])}")
+                    st.write(f"**{row['Candidate Name']}**")
+                    st.write(f"{row['Title']}")
+                    st.metric("Score", f"{row['Score']:.4f}")
+                    st.caption(f"Match: {row['Match %']:.2f}%")
+                    if row["Skills"]:
+                        st.write(f"Skills: {row['Skills']}")
+                    st.write(row["Reasoning"])
+                else:
+                    st.caption(f"Rank #{i+1}")
+                    st.write("No candidate available")
 
 
-def skill_chips(skills: list[str]) -> str:
-    if not skills:
-        return '<span class="skill-chip">Evidence in reason</span>'
-    return "".join(f'<span class="skill-chip">{html.escape(skill)}</span>' for skill in skills[:5])
-
-
-def render_preview_cards(rows: list[Any]) -> None:
-    cards = []
-    for index, row in enumerate(rows[:3], start=1):
-        data = candidate_display(row)
-        rank_class = " rank-one" if index == 1 else ""
-        cards.append(
-            f"""
-            <div class="preview-card{rank_class}">
-              <div class="preview-rank">Rank #{index}</div>
-              <div class="preview-name">{html.escape(str(data['name']))}</div>
-              <div class="preview-score">{row.score * 100:.1f}%</div>
-              <div>{skill_chips(data['skills'])}</div>
-              <p style="margin-top:12px; color:var(--text-2); font-size:0.9rem;">{html.escape(str(data['summary'])[:220])}</p>
-            </div>
-            """
-        )
-    st.markdown('<div class="preview-grid">' + "".join(cards) + "</div>", unsafe_allow_html=True)
-
-
-def render_results_table(rows: list[Any]) -> None:
-    body = []
-    for index, row in enumerate(rows, start=1):
-        data = candidate_display(row)
-        top_class = " top-three" if index <= 3 else ""
-        rank_one = " rank-one" if index == 1 else ""
-        chip_class = "gold" if index == 1 else ""
-        pct = max(2, min(100, row.score * 100))
-        body.append(
-            f"""
-            <tr class="{top_class}{rank_one}">
-              <td><span class="rank-chip {chip_class}">{index}</span></td>
-              <td><div class="candidate-id">{html.escape(str(data['name']))}</div><div style="color:var(--muted); font-size:0.82rem;">{html.escape(row.candidate_id)}</div></td>
-              <td><span class="score-pill {score_class(row.score)}">{row.score:.4f}</span><div class="match-track"><div class="match-fill" style="width:{pct:.1f}%"></div></div></td>
-              <td>{pct:.1f}%</td>
-              <td>{skill_chips(data['skills'])}</td>
-              <td>{html.escape(row.reasoning)}</td>
-            </tr>
-            """
-        )
-    st.markdown(
-        f"""
-        <div class="results-table-wrap">
-          <table class="results-table">
-            <thead>
-              <tr><th>Rank</th><th>Candidate</th><th>Match Score</th><th>Match %</th><th>Skills</th><th>Reason</th></tr>
-            </thead>
-            <tbody>{''.join(body)}</tbody>
-          </table>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+def render_ranked_table(df: pd.DataFrame) -> None:
+    st.dataframe(df, use_container_width=True, hide_index=True)
 
 
 def render_results() -> None:
@@ -1365,12 +1237,19 @@ def render_results() -> None:
         )
         return
 
+    ranked_df = st.session_state.get("ranked_df")
+    if ranked_df is None or not isinstance(ranked_df, pd.DataFrame) or ranked_df.empty:
+        ranked_df = build_ranked_dataframe(rows)
+        st.session_state.ranked_df = ranked_df
+        st.session_state.top3_df = ranked_df.head(3).copy()
+        st.session_state.csv_bytes = ranked_df.to_csv(index=False).encode("utf-8")
+
     st.success(f"Generated {len(rows)} ranked rows.")
     metric_cols = st.columns(4)
     metric_cols[0].metric("Ranked rows", len(rows))
     metric_cols[1].metric("Top score", f"{rows[0].score:.4f}")
     metric_cols[2].metric("Best candidate", rows[0].candidate_id)
-    metric_cols[3].metric("CSV columns", "4")
+    metric_cols[3].metric("CSV columns", str(len(ranked_df.columns)))
 
     summary = st.session_state.last_run_summary or {}
     if summary:
@@ -1386,102 +1265,134 @@ def render_results() -> None:
     else:
         st.info("Official validator requires exactly 100 rows. Checklist item 4 completes only for a valid top-100 run.")
 
+    csv_bytes = st.session_state.get("csv_bytes")
+    if not csv_bytes:
+        csv_bytes = ranked_df.to_csv(index=False).encode("utf-8")
+        st.session_state.csv_bytes = csv_bytes
+
     st.download_button(
         "Download ranked CSV",
-        data=st.session_state.rank_csv,
-        file_name="sandbox_submission.csv",
+        data=csv_bytes,
+        file_name="ranked_candidates.csv",
         mime="text/csv",
         use_container_width=True,
         on_click=mark_downloaded,
     )
 
     st.subheader("Top 3 candidates")
-    render_preview_cards(rows)
+    render_top3_cards(ranked_df)
 
     st.subheader("Ranked candidates")
-    render_results_table(rows)
+    render_ranked_table(ranked_df)
 
 
-def render_resources_bottom() -> None:
-    st.write("")
-    with st.expander("Additional information and reproduction commands", expanded=bool(st.session_state.show_docs)):
-        st.markdown("### Official reproduction command")
-        st.code(
-            "python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100\n"
-            "python validate_submission.py ./team_yourid.csv",
-            language="bash",
-        )
-        st.markdown("### Methodology summary")
-        st.write(
-            "The ranker combines retrieval/ranking evidence, embeddings/vector database skills, applied ML/NLP depth, "
-            "production engineering, product-company experience, 5-9 year seniority fit, logistics, and Redrob behavioral signals. "
-            "It down-weights keyword stuffing, inactive candidates, consulting-only histories, long notice periods, suspicious profiles, "
-            "and unsupported AI claims."
-        )
+with st.sidebar:
+    st.markdown(
+        f"""
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">{icon_svg("target", 22)}</div>
+          <div><div class="sidebar-title">Redrob Ranker</div></div>
+        </div>
+        <p class="sidebar-copy">Small-sample sandbox for the official offline ranking system.</p>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.divider()
 
+    sidebar_page = st.radio(
+        "Quick access",
+        ["Overview", "Run Ranker", "Results"],
+        label_visibility="collapsed",
+        index=["Overview", "Run Ranker", "Results"].index(st.session_state.nav_choice)
+        if st.session_state.nav_choice in ["Overview", "Run Ranker", "Results"]
+        else 0,
+    )
+    st.session_state.nav_choice = sidebar_page
 
-def set_page(page_name: str) -> None:
-    st.session_state.page = page_name
-
+    st.divider()
+    st.markdown("### Live checklist")
+    render_checklist()
+    st.divider()
+    st.caption("CPU-only · no network · no hosted LLM calls")
 
 render_topbar()
+render_hero()
 
-st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
-page = st.radio(
+# Sidebar-collapse fallback nav in main area.
+main_nav = st.radio(
     "Navigation",
-    ["Overview", "Upload & Rank", "Results"],
+    ["Overview", "Run Ranker", "Results"],
     horizontal=True,
     label_visibility="collapsed",
-    key="page",
+    index=["Overview", "Run Ranker", "Results"].index(st.session_state.nav_choice)
+    if st.session_state.nav_choice in ["Overview", "Run Ranker", "Results"]
+    else 0,
+    key="main_nav",
 )
-st.markdown('</div>', unsafe_allow_html=True)
-
-render_hero()
+if main_nav != st.session_state.nav_choice:
+    st.session_state.nav_choice = main_nav
 
 cta_cols = st.columns([1, 1, 4])
 with cta_cols[0]:
     if st.button("Run Demo", use_container_width=True):
-        set_page("Upload & Rank")
+        st.session_state.nav_choice = "Run Ranker"
         st.rerun()
 with cta_cols[1]:
     if st.button("Documentation", use_container_width=True):
         st.session_state.show_docs = not st.session_state.show_docs
 
-st.write("")
-stat_cols = st.columns(4)
-with stat_cols[0]:
-    bento_card("Candidates", "Max 100", "target")
-with stat_cols[1]:
-    bento_card("Job Description", "TXT / MD / DOCX", "file")
-with stat_cols[2]:
-    bento_card("Ranking", "Offline Engine", "play")
-with stat_cols[3]:
-    bento_card("Output", "CSV Export", "download")
+status_cols = st.columns(4)
+with status_cols[0]:
+    status_html("Candidates", "Max 100", "target")
+with status_cols[1]:
+    status_html("Job Description", "TXT / MD / DOCX", "file")
+with status_cols[2]:
+    status_html("Ranking", "Offline Engine", "play")
+with status_cols[3]:
+    status_html("Output", "CSV Export", "download")
 
 st.write("")
+render_steps()
+
+page = st.session_state.nav_choice
 
 if page == "Overview":
-    st.subheader("Overview")
+    st.subheader("Getting started")
     st.markdown(
         """
-        <div class="info-card">
-          <h3 class="card-title">A lightweight ranking workspace for Redrob submissions.</h3>
-          <p class="card-copy">
-            Use the Upload & Rank page to run the sandbox workflow. The official 100K run should still be executed locally with <code>rank.py</code>.
-          </p>
+        <div class="quick-card" style="max-width:760px;">
+          <h3 class="card-title">Follow the live checklist to complete the ranking workflow.</h3>
+          <p class="card-copy">Upload/select a candidate sample, add the job description, run ranking, validate a top-100 run, and download the CSV.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
+    if st.session_state.show_docs:
+        st.write("")
+        st.subheader("Documentation")
+        st.code(
+            "python rank.py --candidates ./candidates.jsonl --job ./uploads/A1.txt --out ./team_yourid.csv --top-k 100\n"
+            "python validate_submission.py ./team_yourid.csv",
+            language="bash",
+        )
 
-elif page == "Upload & Rank":
-    render_steps()
-    upload_cols = st.columns([1.05, 1.05, 0.9])
+elif page == "Run Ranker":
+    left, right = st.columns(2)
 
-    with upload_cols[0]:
+    with left:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<span class="step-pill">STEP 1 · Upload Candidates</span>', unsafe_allow_html=True)
-        use_repo_sample = sample_candidates_path.exists() and st.checkbox("Use bundled sample_candidates.json", value=True)
+
+        bundled_sample_exists = sample_candidates_path.is_file()
+        use_repo_sample = st.checkbox(
+            "Use bundled sample_candidates.json",
+            value=bundled_sample_exists,
+            disabled=not bundled_sample_exists,
+        )
+        if not bundled_sample_exists:
+            use_repo_sample = False
+            st.error("Bundled sample_candidates.json not found. Please upload candidate sample.")
+
         candidate_upload = None
         if not use_repo_sample:
             candidate_upload = st.file_uploader(
@@ -1489,25 +1400,39 @@ elif page == "Upload & Rank":
                 type=["json", "jsonl", "ndjson", "txt", "gz"],
                 help="Accepts JSON array, JSONL/NDJSON/TXT with one JSON object per line, or gzipped JSONL.",
             )
+
         st.session_state.candidate_ready = bool(use_repo_sample or candidate_upload is not None)
-        if use_repo_sample:
-            candidate_success_card("sample_candidates.json", sample_candidates_path.stat().st_size, count_candidates(sample_candidates_path))
+
+        if use_repo_sample and sample_candidates_path.is_file():
+            candidate_success_card(
+                "sample_candidates.json",
+                sample_candidates_path.stat().st_size,
+                count_candidates(sample_candidates_path),
+            )
         elif candidate_upload is not None:
-            candidate_count = None
-            if candidate_upload.size <= 25 * 1024 * 1024:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=Path(candidate_upload.name).suffix or ".jsonl") as handle:
-                    handle.write(candidate_upload.getvalue())
-                    temp_candidate_path = Path(handle.name)
-                candidate_count = count_candidates(temp_candidate_path)
-                temp_candidate_path.unlink(missing_ok=True)
-            candidate_success_card(candidate_upload.name, candidate_upload.size, candidate_count)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=Path(candidate_upload.name).suffix or ".jsonl") as handle:
+                handle.write(candidate_upload.getvalue())
+                temp_candidate_path = Path(handle.name)
+            candidate_success_card(candidate_upload.name, candidate_upload.size, count_candidates(temp_candidate_path))
+            temp_candidate_path.unlink(missing_ok=True)
+
         st.caption("Sandbox samples can be ≤100 candidates. Use the CLI for the official 100K run.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    with upload_cols[1]:
+    with right:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<span class="step-pill">STEP 2 · Upload Job Description</span>', unsafe_allow_html=True)
-        use_repo_job = sample_job_path.exists() and st.checkbox("Use bundled A1.txt job description", value=True)
+
+        bundled_job_exists = sample_job_path.is_file()
+        use_repo_job = st.checkbox(
+            "Use bundled A1.txt job description",
+            value=bundled_job_exists,
+            disabled=not bundled_job_exists,
+        )
+        if not bundled_job_exists:
+            use_repo_job = False
+            st.error("Bundled A1.txt not found. Please upload or paste a job description.")
+
         job_upload = None
         job_text = ""
         if not use_repo_job:
@@ -1517,18 +1442,18 @@ elif page == "Upload & Rank":
                 help="DOCX files are parsed with python-docx; text and markdown are read directly.",
             )
             job_text = st.text_area("Or paste job description", height=165, placeholder="Paste the job description here...")
+
         st.session_state.job_ready = bool(use_repo_job or job_upload is not None or job_text.strip())
-        if use_repo_job:
+
+        if use_repo_job and sample_job_path.is_file():
             job_success_card("A1.txt", sample_job_path.stat().st_size)
         elif job_upload is not None:
             job_success_card(job_upload.name, job_upload.size)
         elif job_text.strip():
             job_success_card("Pasted job description", len(job_text.encode("utf-8")), "Text entered successfully.")
+
         st.caption("DOCX, TXT, MD, or pasted text are supported.")
         st.markdown("</div>", unsafe_allow_html=True)
-
-    with upload_cols[2]:
-        render_checklist_card()
 
     st.write("")
     top_k = st.slider(
@@ -1538,6 +1463,7 @@ elif page == "Upload & Rank":
         value=50 if use_repo_sample else 100,
         help="Official submission requires 100 rows. Small sandbox samples may contain fewer candidates.",
     )
+
     required_ready = bool(st.session_state.candidate_ready and st.session_state.job_ready)
     st.markdown('<div class="sticky-run-panel">', unsafe_allow_html=True)
     run_cols = st.columns([2, 1])
@@ -1551,7 +1477,7 @@ elif page == "Upload & Rank":
         )
     with run_cols[1]:
         run = st.button("Run Ranking", type="primary", use_container_width=True, disabled=not required_ready)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if run:
         run_ranking(
@@ -1567,18 +1493,16 @@ elif page == "Upload & Rank":
 elif page == "Results":
     render_results()
 
-render_resources_bottom()
-
 st.markdown(
-    f"""
+    """
     <div class="footer-card">
       <div>
         <strong>Built for the Redrob AI Challenge</strong><br>
         Offline Candidate Ranking Engine · Version 1.0
       </div>
       <div class="footer-links">
-        <a href="https://github.com/" target="_blank">{icon_svg("github", 16)} GitHub</a>
-        <a href="#" target="_self">{icon_svg("book", 16)} Documentation</a>
+        <a href="https://github.com/" target="_blank">GitHub</a>
+        <a href="#" target="_self">Documentation</a>
       </div>
     </div>
     """,
